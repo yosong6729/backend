@@ -25,4 +25,8 @@ public class Member {
     @CreationTimestamp
     private Timestamp createDate;
 
+    //지도관련
+    private String address;
+    private Double latitude;
+    private Double longitude;
 }
