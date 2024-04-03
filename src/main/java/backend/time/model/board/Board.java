@@ -57,7 +57,6 @@ public class Board {
     @CreationTimestamp
     private Timestamp createDate;
 
-    //지도.. 위치.. 어떡하지..
 
 /*
     @Column(name = "modified_date")

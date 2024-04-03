@@ -20,7 +20,7 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    private Long mannerTime; // 그 사람의 시간(like 당근 온도)
+    private Long mannerTime = 15L; // 그 사람의 시간(like 당근 온도) //기본 15분
 
     @CreationTimestamp
     private Timestamp createDate;
