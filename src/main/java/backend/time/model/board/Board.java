@@ -4,6 +4,7 @@ import backend.time.model.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -56,8 +57,11 @@ public class Board {
 
     //지도 관련
     private String address;
-    private Double latitude;
-    private Double longitude;
+    //위도경도를 한번에 위치를 나타내는 점
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point location;
+//    private Double latitude;
+//    private Double longitude;
 
     //불필요
 /*

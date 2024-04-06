@@ -3,6 +3,7 @@ package backend.time.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
 
@@ -27,6 +28,11 @@ public class Member {
 
     //지도관련
     private String address;
-    private Double latitude;
-    private Double longitude;
+
+    //위도경도를 한번에 위치를 나타내는 점
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point location;
+
+//    private Double latitude;
+//    private Double longitude;
 }
