@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 public class BoardSearchDto {
     private String keyword;
-    private int pageNum;
+    private int pageNum = 0;
     private String category;
     private Double userLongitude;
     private Double userLatitude;
+    private String boardType = "buy";
 }

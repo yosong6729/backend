@@ -46,6 +46,9 @@ public class Board {
     private BoardState boardState = BoardState.SALE;
 
     @Enumerated(EnumType.STRING)
+    private BoardType boardType = BoardType.buy;
+
+    @Enumerated(EnumType.STRING)
     private BoardCategory boardCategory;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)

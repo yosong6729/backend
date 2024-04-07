@@ -5,6 +5,7 @@ import backend.time.dto.ResponseDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
 import backend.time.model.board.Board;
+import backend.time.model.board.BoardState;
 import backend.time.repository.BoardRepository;
 import backend.time.service.BoardService;
 import jakarta.validation.Valid;
@@ -60,6 +61,7 @@ public class BoardApiController {
 //            dto.setCreatedDate(board.getCreateDate());
 //            dto.setChatCount(board.getChatCount());
 //            dto.setScrapCount(board.getScrapCount());
+//            dto.setBoardState(board.getBoardState());
 //            dto.setDistance(boardIdToDistanceMap.getOrDefault(board.getId(), null));
 //
 //            return dto;
@@ -67,21 +69,21 @@ public class BoardApiController {
 //
 //        return new Result(collect);
 //    }
-
-    @Data
-    public class BoardListResponseDto {
-        private Long boardId;
-        private String title;
-        private Timestamp createdDate;
-        private int chatCount;
-        private int scrapCount;
-        private Double distance;
-
-        }
-
-    @Data
-    @AllArgsConstructor
-    static class Result<T> {
-        private T data;
-    }
+//
+//    @Data
+//    public class BoardListResponseDto {
+//        private Long boardId;
+//        private String title;
+//        private Timestamp createdDate;
+//        private int chatCount;
+//        private int scrapCount;
+//        private Double distance;
+//        private BoardState boardState;
+//        }
+//
+//    @Data
+//    @AllArgsConstructor
+//    static class Result<T> {
+//        private T data;
+//    }
 }

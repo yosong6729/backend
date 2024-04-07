@@ -90,6 +90,11 @@ public class BoardService {
 //            spec = spec.and(BoardSpecification.withCategory(requestDto.getCategory()));
 //        }
 //
+//        // 타입으로 검색
+//        if (requestDto.getBoardType() != null && !requestDto.getBoardType().isEmpty()) {
+//            spec = spec.and(BoardSpecification.withType(requestDto.getBoardType()));
+//        }
+//
 //        return boardRepository.findAll(spec, pageable);
 //    }
 }
