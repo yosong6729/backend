@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 @Builder
 @Entity
 public class Member {
+
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +31,7 @@ public class Member {
     private String address;
 
     //위도경도를 한번에 위치를 나타내는 점
-    @Column(columnDefinition = "geometry(Point,4326)")
+
     private Point location;
 
 //    private Double latitude;

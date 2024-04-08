@@ -1,9 +1,12 @@
 package backend.time.model.board;
 
 import backend.time.model.Member;
+import backend.time.model.Scrap;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
+import org.locationtech.jts.awt.PointShapeFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
@@ -33,9 +36,8 @@ public class Board {
 
     private String itemTime; // 해당 시간
 
-    //불필요
-    /*@OneToMany(mappedBy = "board",cascade = CascadeType.ALL)
-    private List<Scrap> scraps = new ArrayList<>();*/
+    @OneToMany(mappedBy = "board",cascade = CascadeType.ALL)
+    private List<Scrap> scraps = new ArrayList<>();
 
     private int chatCount = 0; // 채팅한 사람 수
 
@@ -61,17 +63,10 @@ public class Board {
     //지도 관련
     private String address;
     //위도경도를 한번에 위치를 나타내는 점
-    @Column(columnDefinition = "geometry(Point,4326)")
-    private Point location;
-//    private Double latitude;
-//    private Double longitude;
+//    @Column(columnDefinition = "geometry(Point,4326)")
+//    private Point location;
 
-    //불필요
-/*
-    @Column(name = "modified_date")
-    @CreationTimestamp
-    private Timestamp modifiedDate;
-*/
+    private Point location;
 
     //신고와 이의 신청은 다르지 ?
     // 신고는 게시글 신고, 유저 신고
