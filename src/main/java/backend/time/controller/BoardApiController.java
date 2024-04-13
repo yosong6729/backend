@@ -40,7 +40,7 @@ public class BoardApiController {
 //        boardService.write(boardDto, principalDetail.getMember());
 //        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
 //    }
-
+//
 //    //글 조회(검색)
 //    @GetMapping("/api/board")
 //    public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto, @AuthenticationPrincipal PrincipalDetail principalDetail) {
@@ -64,26 +64,32 @@ public class BoardApiController {
 //            dto.setBoardState(board.getBoardState());
 //            dto.setDistance(boardIdToDistanceMap.getOrDefault(board.getId(), null));
 //
+//            //이미지가 있으면 첫번째 사진의 storedFileName 넘겨줌 없으면 null
+//            if (!board.getImages().isEmpty()) {
+//                dto.setFirstImage(board.getImages().get(0).getStoredFileName());
+//            }
+//
 //            return dto;
 //        }).collect(Collectors.toList());
 //
 //        return new Result(collect);
 //    }
-//
-//    @Data
-//    public class BoardListResponseDto {
-//        private Long boardId;
-//        private String title;
-//        private Timestamp createdDate;
-//        private int chatCount;
-//        private int scrapCount;
-//        private Double distance;
-//        private BoardState boardState;
-//        }
-//
-//    @Data
-//    @AllArgsConstructor
-//    static class Result<T> {
-//        private T data;
-//    }
+
+    @Data
+    public class BoardListResponseDto {
+        private Long boardId;
+        private String title;
+        private Timestamp createdDate;
+        private int chatCount;
+        private int scrapCount;
+        private Double distance;
+        private BoardState boardState;
+        private String firstImage;
+        }
+
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private T data;
+    }
 }
