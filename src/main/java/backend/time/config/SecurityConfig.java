@@ -79,7 +79,3 @@ public class SecurityConfig  {
         return http.build();
     }
 }
-/*                .authorizeHttpRequests()
-                .anyRequest().authenticated()
-                */
-/*               .loginProcessingUrl("/login")*/

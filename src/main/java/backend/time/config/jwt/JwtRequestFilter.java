@@ -99,9 +99,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         System.out.println("requeset "+request.getHeader("Authorization")+" response "+response.getStatus());
         filterChain.doFilter(request, response);
     }
-/*    public Authentication getAuthentication(MemberDto member) {
-        return new UsernamePasswordAuthenticationToken(member, "",
-                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
-    } //수정해야함*/
+
 
 }
