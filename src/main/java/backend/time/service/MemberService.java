@@ -30,7 +30,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     //액세스 토큰과 리프레시 토큰을 얻기 위함
-   public String getReturnAccessToken(String code) {
+    public String getReturnAccessToken(String code) {
         System.out.println(code);
         String access_token = "";
         String refresh_token = "";
@@ -59,7 +59,7 @@ public class MemberService {
             bw.flush();
             con.connect();
 
-           int responseCode = con.getResponseCode();
+            int responseCode = con.getResponseCode();
             String r = con.getResponseMessage();
             System.out.println("responseCode지롱 : "+r);
             System.out.println("responseCode"+responseCode);
@@ -94,7 +94,7 @@ public class MemberService {
 
     //사용자 정보 가져오기
     @Transactional
-    public Map<String, Object> getUserInfo(String access_token){
+    public Member getUserInfo(String access_token){
         Map<String, Object> resultMap = new HashMap<>();
         String reqURL = "https://kapi.kakao.com/v2/user/me"; // 사용자 정보 가져오기
         try{
@@ -124,31 +124,27 @@ public class MemberService {
 //            System.out.println("element = "+element);
 
             String kakaoId = element.getAsJsonObject().get("id").getAsString();
-            resultMap.put("id", kakaoId);
-            System.out.println("resultMap"+resultMap);
 
             Optional<Member> isOurMember = memberRepository.findByKakaoId(kakaoId);
+            br.close();
 
             //존재하면 resultMap 값 넣어줌
-            if(memberRepository.findByKakaoId(kakaoId).isPresent()) {
-                String nickname = isOurMember.get().getNickname();
-                resultMap.put("nickname", nickname);
+            if(isOurMember.isPresent()) {
+                return isOurMember.get();
             }
             else{
-/*                Member member = Member.builder()
+                Member member = Member.builder()
                         .kakaoId(kakaoId)
                         .role(Member_Role.GUEST)
                         .build();
-                memberRepository.save(member);*/
+                memberRepository.save(member);
+                return member;
             }
             // 우리 앱 회원이 아니면 resultMap는 id만 있음
-            System.out.println("resultMap:"+resultMap);
-            br.close();
-            return resultMap;
 
         }
         catch (Exception e){
-            System.out.println("여기당");
+            System.out.println("사용자 정보를 불러오지 못함");
 //            e.printStackTrace();
             return null;
         }
@@ -157,18 +153,11 @@ public class MemberService {
     //회원가입(위치 미포함)
     @Transactional
     public void saveMember(String kakaoId, String nickname){
-        memberRepository.findByKakaoId(kakaoId)
+        Member member = memberRepository.findByKakaoId(kakaoId)
                 .orElseThrow(()->new IllegalArgumentException("허용된 토큰이 아닙니다."));
-        Member member = Member.builder()
-                .kakaoId(kakaoId)
-                .nickname(nickname)
-                .role(Member_Role.USER)
-//                .address(people.get().getAddress())
-//                .latitude(people.get().getLatitude())
-//                .longitude(people.get().getLongitude())
-                .build();
+        member.setRole(Member_Role.USER);
+        member.setNickname(nickname);
 
-        memberRepository.save(member);
     }
 
 
@@ -194,14 +183,10 @@ public class MemberService {
         String reqURL = "https://kapi.kakao.com/v1/user/logout";
         try{
 
-
         }
         catch (Exception e){
             e.printStackTrace();
         }
-
-
     }
-
     // 회원 탈퇴 : 시스템 회원 탈퇴 후 카카오 연결끊기 api 호출
 }

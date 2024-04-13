@@ -50,84 +50,58 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private PrincipalDetailService principleDetailService;
-    private MemberRepository memberRepository;
 
     @Autowired
-    private MemberService memberService;
+    private MemberRepository memberRepository;
+
+    private static final String NO_CHECK_URL = "/kakao/login";
+    private static final String NO_CHECK_URL2 = "/login";
+    private final MemberService memberService;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (request.getRequestURI().equals(NO_CHECK_URL) ) {
+            System.out.println("여긴데?");
+            filterChain.doFilter(request, response); // "/login" 요청이 들어오면, 다음 필터 호출
+            return; // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
+        }
 
         final String requestTokenHeader = request.getHeader("Authorization");
         System.out.println("requestTokenHeader"+requestTokenHeader);
 
         String kakaoId = null;
-        String kakaoToken = null;
+        String jwtToken = null;
 
         if(requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")){
-            kakaoToken = requestTokenHeader.substring(7);
-//            OAuth2UserRequest oAuth2UserRequest = createOAuth2UserRequest(kakaoToken);
-            Map<String, Object> userInfo = memberService.getUserInfo(kakaoToken);
-            System.out.println(userInfo);
-            kakaoId = userInfo.get("id").toString();
-//            System.out.println(oAuth2UserRequest.getClientRegistration() + " and " + oAuth2UserRequest.getAccessToken());
-//            PrincipalDetail principalDetail = (PrincipalDetail)principleDetailService.loadUser(oAuth2UserRequest);
-//            System.out.println(principalDetail);
-//            userName = jwtTokenUtil.extractUsername(jwtToken); //return extractClaim(token, Claims::getSubject);
+            jwtToken = requestTokenHeader.substring(7);
+
+            kakaoId = jwtTokenUtil.extractUsername(jwtToken); //return extractClaim(token, Claims::getSubject);
+            System.out.println("jwt에서 뽑은 kakaoId"+kakaoId);
         }
 
         if(SecurityContextHolder.getContext().getAuthentication()==null){
-//            PrincipalDetail principalDetail = (PrincipalDetail)principleDetailService.loadUser()
-/*
-            Member member = memberRepository.findByKakaoId(kakaoId)
-                    .orElse(null);
-            if(member == null){
-                MemberDto memberDto = MemberDto.builder()
-                        .kakaoId(kakaoId)
-                       */
-/* .nickname(member.getNickname())
-                        .mannerTime(member.getMannerTime())*//*
 
-                        .role(member.getRole())
-                        .build();
-            }
-            else{
-                MemberDto memberDto = MemberDto.builder()
-                        .kakaoId(member.getKakaoId())
-                        .nickname(member.getNickname())
-                        .mannerTime(member.getMannerTime())
-                        .role(member.getRole())
-                        .build();
-            }
-*/
-
-//            PrincipalDetail principalDetail = (PrincipalDetail) principleDetailService.loadUser(kakaoId);
             PrincipalDetail principalDetail1 = (PrincipalDetail) principleDetailService.loadUserByUsername(kakaoId);
-            System.out.println("principalDetail"+principalDetail1.getUsername());
+
+            System.out.println("principalDetail"+principalDetail1.getAuthorities());
 //                Authentication auth = getAuthentication(memberDto);
 //                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(principalDetail, null, principalDetail.getAuthorities());
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(principalDetail1, null,
-                        authoritiesMapper.mapAuthorities(principalDetail1.getAuthorities()));
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(principalDetail1, null,
+                    authoritiesMapper.mapAuthorities(principalDetail1.getAuthorities()));
 /*                usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));*/
 
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             System.out.println("Security"+SecurityContextHolder.getContext());
-
-            if(response.getStatus()==200){
-//                System.out.println(usernamePasswordAuthenticationToken.);
-                kakaoLoginSuccessHandler.onAuthenticationSuccess(request, response,usernamePasswordAuthenticationToken);
-            }
-
 
         }
         System.out.println("requeset "+request.getHeader("Authorization")+" response "+response.getStatus());
         filterChain.doFilter(request, response);
     }
-    public Authentication getAuthentication(MemberDto member) {
+/*    public Authentication getAuthentication(MemberDto member) {
         return new UsernamePasswordAuthenticationToken(member, "",
                 Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
-    } //수정해야함
+    } //수정해야함*/
 
 }

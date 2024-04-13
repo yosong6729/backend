@@ -31,18 +31,18 @@ public class JwtTokenUtil {
 
     //RefreshToken 생성
     public String generateRefreshToken(PrincipalDetail principalDetail) {
-        return doGenerateToken(principalDetail.getUsername(), refreshExpirationTime,principalDetail.getUserId());
+        System.out.println("access token principal"+principalDetail.getUsername());
+        return doGenerateToken(principalDetail.getUsername(), refreshExpirationTime);
     }
 
     //AccessToken 생성
     public String generateToken(PrincipalDetail principalDetail) {
-        return doGenerateToken(principalDetail.getUsername(), expirationTime,principalDetail.getUserId());
+        return doGenerateToken(principalDetail.getUsername(), expirationTime);
     }
 
     //JWT 토큰 생성
-    private String doGenerateToken(String subject, Long expirationTime, Long userId) {
+    private String doGenerateToken(String subject, Long expirationTime) {
         Claims claims = Jwts.claims().setSubject(subject);
-        claims.put("userId", userId);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -79,7 +79,7 @@ public class JwtTokenUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJwt(token).getBody();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {

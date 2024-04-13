@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UnfinishedMemberDto {
-    String token;
-    String nickname;
+public class KakaoDto {
+    String kakaoid;
 }
