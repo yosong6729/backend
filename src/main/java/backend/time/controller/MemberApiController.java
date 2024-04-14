@@ -85,15 +85,7 @@ public class MemberApiController {
         }
     }
 
-    @PostMapping("/kakao/logout")
-    public ResponseDto logout(HttpServletRequest request) {
-        String authToken = request.getHeader("Authorization");
-        final String token = authToken.substring("Bearer ".length());
-        String username = jwtTokenUtil.extractUsername(token);
-        // accessToken 삭제
-        redisTemplate.delete("accessToken "+username);
-        return new ResponseDto(HttpStatus.OK.value(), "로그아웃되었습니다.");
-    }
+
 
 /*
     @PostMapping("/auth/getJwt")
