@@ -131,6 +131,7 @@ public class MemberService {
             //존재하면 resultMap 값 넣어줌
             if(isOurMember.isPresent()) {
                 return isOurMember.get();
+
             }
             else{
                 Member member = Member.builder()
@@ -144,7 +145,7 @@ public class MemberService {
 
         }
         catch (Exception e){
-            System.out.println("사용자 정보를 불러오지 못함");
+            System.out.println("여기당");
 //            e.printStackTrace();
             return null;
         }
@@ -157,7 +158,6 @@ public class MemberService {
                 .orElseThrow(()->new IllegalArgumentException("허용된 토큰이 아닙니다."));
         member.setRole(Member_Role.USER);
         member.setNickname(nickname);
-
     }
 
 

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.interfaces.ECPrivateKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Component
@@ -31,7 +33,6 @@ public class JwtTokenUtil {
 
     //RefreshToken 생성
     public String generateRefreshToken(PrincipalDetail principalDetail) {
-        System.out.println("access token principal"+principalDetail.getUsername());
         return doGenerateToken(principalDetail.getUsername(), refreshExpirationTime);
     }
 
@@ -41,13 +42,14 @@ public class JwtTokenUtil {
     }
 
     //JWT 토큰 생성
-    private String doGenerateToken(String subject, Long expirationTime) {
-        Claims claims = Jwts.claims().setSubject(subject);
+    private String doGenerateToken(String subject, long expirationMilliseconds) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + expirationMilliseconds);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .setSubject(subject)
+                .setIssuedAt(now)
+                .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, secretKey)
                 .compact();
     }

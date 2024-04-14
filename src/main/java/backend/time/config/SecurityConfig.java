@@ -30,19 +30,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig  {
 
     @Autowired
-    private final PrincipalDetailService principalDetailService;
+    private PrincipalDetailService principalDetailService;
     @Autowired
-    private final JwtRequestFilter jwtRequestFilter;
+    private JwtRequestFilter jwtRequestFilter;
     @Autowired
-    private final KakaoLoginSuccessHandler kakaoLoginSuccessHandler;
+    private KakaoLoginSuccessHandler kakaoLoginSuccessHandler;
     @Autowired
-    private final KakaoLoginFailureHandler kakaoLoginFailureHandler;
+    private KakaoLoginFailureHandler kakaoLoginFailureHandler;
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -59,23 +59,16 @@ public class SecurityConfig  {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-                .httpBasic().disable()
-                .formLogin().disable()
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(
-                                        new AntPathRequestMatcher("/kakao/*"),
-                                        new AntPathRequestMatcher("/sign-up/*"),//회원가입은 접근 가능
-                                        new AntPathRequestMatcher("/login/jwt") //회원가입은 접근 가능
-                                ).permitAll()
-                                .anyRequest().authenticated() // 회원가입 제외 모두 인증된 사용자만 접근 가능
-                )
+                .csrf().disable()
+                .authorizeHttpRequests()
+                    .anyRequest()
+                    .permitAll()
+                .and()
+                    .formLogin()
+                    .loginProcessingUrl("/login/jwt")
+                    .successHandler(kakaoLoginSuccessHandler)
+                    .failureHandler(kakaoLoginFailureHandler);
 
-               .formLogin()
-
-                .successHandler(kakaoLoginSuccessHandler)
-                .failureHandler(kakaoLoginFailureHandler);
         return http.build();
     }
 }
