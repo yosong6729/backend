@@ -79,8 +79,7 @@ public class MemberService {
             bw.close();
 
         } catch (Exception e) {
-            System.out.println("여기...?");
-            e.printStackTrace();
+            System.out.println("KakaoaccessToken을 불러오지 못함");
         }
         return access_token;
     }
@@ -138,8 +137,7 @@ public class MemberService {
 
         }
         catch (Exception e){
-            System.out.println("여기당");
-//            e.printStackTrace();
+            System.out.println("kakao로부터 사용자 정보 불러오기 실패");
             return null;
         }
     }

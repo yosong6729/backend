@@ -59,3 +59,44 @@ public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
                 new ResponseDto<>(response.getStatus(), data)));
     }
 }
+/*
+        CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
+        System.out.println("principal에서 꺼낸 user"+oAuth2User);
+
+
+        if(oAuth2User.getRole()== Member_Role.GUEST) { // 회원이 아닐 경우
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType("application/json;charset=UTF-8");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("isOurMemeber", false);
+
+
+        response.getWriter().println(new ObjectMapper().writeValueAsString(
+        new ResponseDto<>(response.getStatus(), data)
+        ));
+        }
+
+        else{ // 회원이면
+        //access 토큰 생성
+        String accessToken = jwtTokenUtil.generateToken((PrincipalDetail) authentication.getPrincipal());
+        //refresh 토큰 생성
+        String refreshToken = jwtTokenUtil.generateRefreshToken((PrincipalDetail) authentication.getPrincipal());
+
+        // Redis에 Refresh Token 저장
+
+        String nickname = ((UserDetails) authentication.getPrincipal()).getUsername();
+        redisTemplate.opsForValue().set("refresh token:"+ nickname, refreshToken);
+        redisTemplate.expire("refresh token:"+nickname,jwtTokenUtil.getRefreshExpirationTime(), TimeUnit.MILLISECONDS);
+
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("application/json;charset=UTF-8");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("isOurMemeber", true);
+        data.put("accessToken", accessToken);
+        data.put("refreshToken", refreshToken);
+
+        response.getWriter().println(new ObjectMapper().writeValueAsString(
+        new ResponseDto<>(response.getStatus(), data)
+        ));      }*/
