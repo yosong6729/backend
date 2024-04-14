@@ -3,30 +3,18 @@ package backend.time.handler;
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.ResponseDto;
-import backend.time.model.CustomOAuth2User;
-import backend.time.model.KakaoOauth2UserInfo;
-import backend.time.model.Member;
-import backend.time.model.Member_Role;
-import backend.time.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -45,6 +33,8 @@ public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final RedisTemplate<String, String> redisTemplate;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        //여기서 회원가입으로 빠지게 할거임
+
         PrincipalDetail principalDetail = (PrincipalDetail) authentication.getPrincipal();
         System.out.println("사용자" +principalDetail.getUsername()+" 가 로그인했습니다.");
 

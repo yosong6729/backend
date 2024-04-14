@@ -64,10 +64,12 @@ public class SecurityConfig  {
                     .anyRequest()
                     .permitAll()
                 .and()
-                    .formLogin()
-                    .loginProcessingUrl("/login/jwt")
-                    .successHandler(kakaoLoginSuccessHandler)
-                    .failureHandler(kakaoLoginFailureHandler);
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .formLogin()
+                .loginProcessingUrl("/login/jwt")
+                .successHandler(kakaoLoginSuccessHandler)
+                .failureHandler(kakaoLoginFailureHandler);
 
         return http.build();
     }

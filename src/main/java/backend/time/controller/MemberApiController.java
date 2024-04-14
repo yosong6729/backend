@@ -44,8 +44,9 @@ public class MemberApiController {
         data.put("token",token);
         return new ResponseDto(HttpStatus.OK.value(), data);
     }*/
+    //로그인
     @PostMapping("/kakao/login")
-    public ResponseDto ex(@RequestBody TokenDto token){
+    public ResponseDto login(@RequestBody TokenDto token){
         Map<String, Object> data = new HashMap<>();
         System.out.println("token "+token.getToken());
         Member member = memberService.getUserInfo(token.getToken());
@@ -63,6 +64,12 @@ public class MemberApiController {
                 return new ResponseDto(HttpStatus.OK.value(), data);
             }
         }
+    }
+
+    @PostMapping("/kakao/logout")
+    public ResponseDto logout() {
+
+        return new ResponseDto(HttpStatus.OK.value(), "로그아웃되었습니다.");
     }
 
 /*    @PostMapping("/auth/getJwt")

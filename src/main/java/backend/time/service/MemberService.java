@@ -1,20 +1,13 @@
 package backend.time.service;
 
-import backend.time.dto.ResponseDto;
-import backend.time.exception.NicknameDuplicatedException;
-import backend.time.model.KakaoOauth2UserInfo;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
 import backend.time.repository.MemberRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.net.HttpURLConnection;

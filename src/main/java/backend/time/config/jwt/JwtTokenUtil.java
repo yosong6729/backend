@@ -1,21 +1,12 @@
 package backend.time.config.jwt;
 
 import backend.time.config.auth.PrincipalDetail;
-import backend.time.exception.KakaoAuthenticationProcessingException;
-import com.nimbusds.jwt.JWT;
 import io.jsonwebtoken.*;
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import java.security.interfaces.ECPrivateKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
