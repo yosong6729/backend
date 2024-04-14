@@ -23,13 +23,20 @@ public class ChatMessage {
 
     private String message;
 
+    @Enumerated(EnumType.STRING)
+    private ChatType type;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_id")
+    @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
 
     @Column(name = "created_date")
     @CreationTimestamp
     private Timestamp createDate;
 
+
+    public void addChat(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
+    }
 
 }
