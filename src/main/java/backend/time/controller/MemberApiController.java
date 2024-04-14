@@ -6,6 +6,7 @@ import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.*;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
+import backend.time.repository.MemberRepository;
 import backend.time.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -85,6 +86,28 @@ public class MemberApiController {
         }
     }
 
+    @PutMapping("/nickname/change")
+    public ResponseDto changeName(@AuthenticationPrincipal PrincipalDetail principalDetail,@RequestBody @Valid NicknameDto nicknameDto) {
+        Boolean isChange = memberService.changeNickname(principalDetail.getMember(), nicknameDto.getNickname());
+        Map<String,Object> data = new HashMap<>();
+        data.put("isChange",isChange);
+        if(isChange){
+            return new ResponseDto(HttpStatus.OK.value(), data);
+        }
+        else{
+            return new ResponseDto(HttpStatus.FORBIDDEN.value(), data);
+        }
+    }
+
+    @DeleteMapping("/delete/member")
+    public ResponseDto deleteMember(@AuthenticationPrincipal PrincipalDetail principalDetail){
+        memberService.deleteMember(principalDetail.getMember());
+        Map<String,Object> data = new HashMap<>();
+        data.put("isDelete",true);
+
+        return new ResponseDto(HttpStatus.OK.value(), data);
+
+    }
 
 
 /*
@@ -116,7 +139,7 @@ public class MemberApiController {
 
 
     // 중복 검사 버튼 눌렀을 때
-    @PostMapping("/sign-up/nicknameCheck")
+    @PostMapping("/sign-up/nicknameCheck") //nickname/nicknameCheck로 바꾸고싶
     public ResponseDto nicknameDuplicated(@RequestBody @Valid NicknameDto nicknameDto){
         Map<String, Object> data = new HashMap<>();
         if(memberService.isNicknameDuplicated(nicknameDto.getNickname())){ //중복됨

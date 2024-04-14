@@ -1,5 +1,7 @@
 package backend.time.service;
 
+import backend.time.config.auth.PrincipalDetail;
+import backend.time.dto.NicknameDto;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
 import backend.time.repository.MemberRepository;
@@ -160,24 +162,28 @@ public class MemberService {
         else{return false;}
     }
 
+    // 닉네임 변경
+    @Transactional
+    public boolean changeNickname(Member member, String nickname){
+        Member isMember = memberRepository.findById(member.getId())
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-
-
-    // 로그아웃 , 성공 시 로그아웃된 사용자 회원번호, 응답코드를 받음 POST
-    // 로그아웃 후에 서비스 초기 화면으로 리다이렉트 하는 후속 조치 필요
-    // 헤더 : Authorization: Bearer ${Access_token}
-    // 요청:서비스 앱 어드민 키 방식..?
-    // 헤더 : Authorization : KakaoAK ${SERVICE_APP_ADMIN_KEY}
-    // 본문 : target_id_type(String)-> 회원번호 정료, user_id로 고정, target_id(Long)-> 로그 아웃 시킬 사용자 회원번호
-    // 응답 : id(Long)로그아웃된 사용자 회원번호
-    public void kakaoLogout(){
-        String reqURL = "https://kapi.kakao.com/v1/user/logout";
-        try{
-
+        if(memberRepository.findByNickname(nickname).isEmpty()){ //닉네임이 중복되지 않으면
+            isMember.setNickname(nickname);
+            return true;
         }
-        catch (Exception e){
-            e.printStackTrace();
+        else{
+            return false;
         }
     }
-    // 회원 탈퇴 : 시스템 회원 탈퇴 후 카카오 연결끊기 api 호출
+
+    //회원 탈퇴 (우리 DB에서만 없애는거)
+    @Transactional
+    public void deleteMember(Member member){
+        Member isMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        memberRepository.delete(isMember);
+    }
+
+
 }
