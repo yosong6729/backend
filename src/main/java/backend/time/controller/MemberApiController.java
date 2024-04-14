@@ -7,12 +7,14 @@ import backend.time.dto.*;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
 import backend.time.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,8 @@ public class MemberApiController {
     private PrincipalDetailService principalDetailService;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    private final StringRedisTemplate redisTemplate;
 
  // 프론트 없이 토큰 받아올 때 쓴 거
    @GetMapping("/oauth/kakao")
@@ -82,17 +86,23 @@ public class MemberApiController {
     }
 
     @PostMapping("/kakao/logout")
-    public ResponseDto logout() {
-
+    public ResponseDto logout(HttpServletRequest request) {
+        String authToken = request.getHeader("Authorization");
+        final String token = authToken.substring("Bearer ".length());
+        String username = jwtTokenUtil.extractUsername(token);
+        // accessToken 삭제
+        redisTemplate.delete("accessToken "+username);
         return new ResponseDto(HttpStatus.OK.value(), "로그아웃되었습니다.");
     }
 
+/*
     @PostMapping("/auth/getJwt")
     public ResponseDto checkJwt(@AuthenticationPrincipal PrincipalDetail userDetails, @RequestBody String nickname){
         Map<String, Object> data = new HashMap<>();
         data.put("현재 로그인한 사용자: " , userDetails.getMember().getKakaoId()+ userDetails.getMember().getMannerTime().toString()+ ", 닉네임 :"+nickname);
         return new ResponseDto(HttpStatus.OK.value(), data);
     }
+*/
 
     // 회원 가입 완료 버튼 눌렀을 때 (위치 미포함)
     @PutMapping("/sign-up")
@@ -127,6 +137,7 @@ public class MemberApiController {
 
         }
     }
+
 
     @Data
     @AllArgsConstructor
