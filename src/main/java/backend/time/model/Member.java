@@ -17,8 +17,7 @@ public class Member {
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String email;
+    private Long kakaoId;
 
     @Column(nullable = false, unique = true)
     private String nickname;
