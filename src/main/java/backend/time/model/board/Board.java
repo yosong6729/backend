@@ -5,9 +5,6 @@ import backend.time.model.Scrap;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.locationtech.jts.awt.PointShapeFactory;
-import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -48,10 +45,10 @@ public class Board {
     private BoardState boardState = BoardState.SALE;
 
     @Enumerated(EnumType.STRING)
-    private BoardType boardType = BoardType.buy;
+    private BoardType boardType = BoardType.BUY;
 
     @Enumerated(EnumType.STRING)
-    private BoardCategory boardCategory;
+    private BoardCategory category;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
@@ -62,11 +59,11 @@ public class Board {
 
     //지도 관련
     private String address;
-    //위도경도를 한번에 위치를 나타내는 점
-//    @Column(columnDefinition = "geometry(Point,4326)")
+//    //위도경도를 한번에 위치를 나타내는 점
 //    private Point location;
 
-    private Point location;
+    private Double longitude;
+    private Double latitude;
 
     //신고와 이의 신청은 다르지 ?
     // 신고는 게시글 신고, 유저 신고

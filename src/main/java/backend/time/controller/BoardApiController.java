@@ -1,12 +1,16 @@
 package backend.time.controller;
 
+import backend.time.config.auth.PrincipalDetail;
 import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.ResponseDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
+import backend.time.dto.request.PointDto;
+import backend.time.model.Member;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardState;
 import backend.time.repository.BoardRepository;
+import backend.time.repository.MemberRepository;
 import backend.time.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,43 +20,119 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class BoardApiController {
 
     final private BoardService boardService;
     final private BoardRepository boardRepository;
+    final private MemberRepository memberRepository;
 
-//    //게시글 작성
+    //user 위치 넣기
+    @PostMapping("/api/auth/point")
+    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        boardService.point(pointDto, principalDetail.getMember());
+        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
+    }
+
+//    //user 위치 넣기 test
+//    @PostMapping("/api/auth/point")
+//    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto) throws IOException {
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//        boardService.point(pointDto, member);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
+//    }
+
+    //게시글 작성
+    @PostMapping("/api/auth/board")
+    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        boardService.write(boardDto, principalDetail.getMember());
+        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
+    }
+
+//    //게시글 작성 test
 //    @PostMapping("/api/auth/board")
-//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-//        boardService.write(boardDto, principalDetail.getMember());
+//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto) throws IOException {
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//        boardService.write(boardDto, member);
 //        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
 //    }
-//
-//    //글 조회(검색)
+
+    //글 조회(검색)
+    @GetMapping("/api/board")
+    public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto, @AuthenticationPrincipal PrincipalDetail principalDetail) {
+        Page<Board> boards = boardService.searchBoards(requestDto, principalDetail.getMember());
+
+        // BoardDistanceDto 리스트를 생성
+        List<BoardDistanceDto> boardDistanceDtos = boardRepository.findNearbyOrUnspecifiedLocationBoardsWithDistance(principalDetail.getMember().getLongitude(), principalDetail.getMember().getLatitude());
+        // id를 key로 distance를 값으로 매핑
+        Map<Long, Double> boardIdToDistanceMap = boardDistanceDtos.stream()
+                .collect(Collectors.toMap(BoardDistanceDto::getId, BoardDistanceDto::getDistance));
+
+        UserAddressResponseDto userAddressResponseDto = new UserAddressResponseDto();
+        userAddressResponseDto.setUserLongitude(principalDetail.getMember().getLongitude());
+        userAddressResponseDto.setUserLatitude(principalDetail.getMember().getLatitude());
+        userAddressResponseDto.setAddress(principalDetail.getMember().getAddress());
+        // 결과 DTO 리스트를 생성
+        List<BoardListResponseDto> collect = boards.getContent().stream().map(board -> {
+            BoardListResponseDto dto = new BoardListResponseDto();
+            dto.setBoardId(board.getId());
+            dto.setTitle(board.getTitle());
+            dto.setCreatedDate(board.getCreateDate());
+            dto.setChatCount(board.getChatCount());
+            dto.setScrapCount(board.getScrapCount());
+            dto.setBoardState(board.getBoardState());
+            dto.setDistance(boardIdToDistanceMap.getOrDefault(board.getId(), null));
+            if(board.getAddress() !=null) {
+            dto.setAddress(board.getAddress());
+            }
+            //이미지가 있으면 첫번째 사진의 storedFileName 넘겨줌 없으면 null
+            if (!board.getImages().isEmpty()) {
+                dto.setFirstImage(board.getImages().get(0).getStoredFileName());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        BoardResponseWrapper responseWrapper = new BoardResponseWrapper();
+        responseWrapper.setUserAddress(userAddressResponseDto);
+        responseWrapper.setBoards(collect);
+
+        return new Result<>(responseWrapper);
+    }
+
+//    //글 조회(검색) Test
 //    @GetMapping("/api/board")
-//    public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto, @AuthenticationPrincipal PrincipalDetail principalDetail) {
-//        Page<Board> boards = boardService.searchBoards(requestDto, principalDetail.getUser());
+//    public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto) {
+//        System.out.println(requestDto.getPageNum());
+//        System.out.println(requestDto.getKeyword());
+//        System.out.println(requestDto.getCategory());
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//        Page<Board> boards = boardService.searchBoards(requestDto, member);
 //
 //        // BoardDistanceDto 리스트를 생성
-//        List<BoardDistanceDto> boardDistanceDtos = boardRepository.findNearbyOrUnspecifiedLocationBoardsWithDistance(principalDetail.getUser().getUserLongitude(), principalDetail.getUser().getUserLatitude());
+//        List<BoardDistanceDto> boardDistanceDtos = boardRepository.findNearbyOrUnspecifiedLocationBoardsWithDistance(member.getLongitude(), member.getLatitude());
 //
 //        // id를 key로 distance를 값으로 매핑
 //        Map<Long, Double> boardIdToDistanceMap = boardDistanceDtos.stream()
 //                .collect(Collectors.toMap(BoardDistanceDto::getId, BoardDistanceDto::getDistance));
 //
+//        UserAddressResponseDto userAddressResponseDto = new UserAddressResponseDto();
+//        userAddressResponseDto.setUserLongitude(member.getLongitude());
+//        userAddressResponseDto.setUserLatitude(member.getLatitude());
+//        userAddressResponseDto.setAddress(member.getAddress());
 //        // 결과 DTO 리스트를 생성
 //        List<BoardListResponseDto> collect = boards.getContent().stream().map(board -> {
 //            BoardListResponseDto dto = new BoardListResponseDto();
@@ -63,18 +143,29 @@ public class BoardApiController {
 //            dto.setScrapCount(board.getScrapCount());
 //            dto.setBoardState(board.getBoardState());
 //            dto.setDistance(boardIdToDistanceMap.getOrDefault(board.getId(), null));
-//
+//            if(board.getAddress() !=null) {
+//                dto.setAddress(board.getAddress());
+//            }
 //            //이미지가 있으면 첫번째 사진의 storedFileName 넘겨줌 없으면 null
 //            if (!board.getImages().isEmpty()) {
 //                dto.setFirstImage(board.getImages().get(0).getStoredFileName());
 //            }
-//
 //            return dto;
 //        }).collect(Collectors.toList());
 //
-//        return new Result(collect);
+//        BoardResponseWrapper responseWrapper = new BoardResponseWrapper();
+//        responseWrapper.setUserAddress(userAddressResponseDto);
+//        responseWrapper.setBoards(collect);
+//
+//        return new Result<>(responseWrapper);
 //    }
 
+    @Data
+    public class UserAddressResponseDto{
+        private Double userLongitude;
+        private Double userLatitude;
+        private String address;
+    }
     @Data
     public class BoardListResponseDto {
         private Long boardId;
@@ -83,9 +174,16 @@ public class BoardApiController {
         private int chatCount;
         private int scrapCount;
         private Double distance;
+        private String address;
         private BoardState boardState;
         private String firstImage;
         }
+
+    @Data
+    public class BoardResponseWrapper {
+        private UserAddressResponseDto userAddress;
+        private List<BoardListResponseDto> boards;
+    }
 
     @Data
     @AllArgsConstructor

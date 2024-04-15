@@ -1,6 +1,6 @@
 package backend.time.model.board;
 
 public enum BoardType {
-    sell, //판매글
-    buy //구매글
+    SELL, //판매글
+    BUY //구매글
 }
