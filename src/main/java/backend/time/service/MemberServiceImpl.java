@@ -14,8 +14,8 @@ public class MemberServiceImpl implements MemberService{
     private final MemberRepository memberRepository;
 
     @Override
-    public Member findMember(String email) {
-        return memberRepository.findByEmail(email).orElseThrow(()->{throw new MemberNotFoundException();});
+    public Member findMember(String kakaoId) {
+        return memberRepository.findByKakaoId(kakaoId).orElseThrow(()->{throw new MemberNotFoundException();});
     }
 
     @Override

@@ -4,7 +4,7 @@ import backend.time.model.Member;
 
 public interface MemberService {
 
-    Member findMember(String email);
+    Member findMember(String kakaoId);
 
     Long join(Member member);
 

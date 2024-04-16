@@ -56,14 +56,14 @@ class ChattingServiceTest {
     @Test
     @Transactional
     public List<ChatRoom> findChatRoomByMember(){
-        List<ChatRoom> chatRoomByMember = chattingService.findChatRoomByMember("test@naver.com");
+        List<ChatRoom> chatRoomByMember = chattingService.findChatRoomByMember("123");
 //        chatRoomByMember.get(0).getBoard().getId();
         return chatRoomByMember;
     }
 
     public Long createMember(){
         Member member = new Member();
-        member.setEmail(UUID.randomUUID().toString());
+        member.setKakaoId(123L);
         member.setNickname(UUID.randomUUID().toString());
         return memberService.join(member);
     }

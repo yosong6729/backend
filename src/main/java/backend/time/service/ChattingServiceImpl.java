@@ -25,8 +25,8 @@ public class ChattingServiceImpl implements ChattingService{
     private final BoardRepository boardRepository;
 
     @Override
-    public List<ChatRoom> findChatRoomByMember(String email) {
-        return chatRoomRepository.findChatRoomByMember(email);
+    public List<ChatRoom> findChatRoomByMember(String kakaoId) {
+        return chatRoomRepository.findChatRoomByMember(kakaoId);
     }
 
     @Override
