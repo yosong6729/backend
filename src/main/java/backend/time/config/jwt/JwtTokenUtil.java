@@ -45,10 +45,8 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    // 토큰 유효성 검사
-/*    public boolean validateToken(String token, PrincipalDetail principalDetail) {
-        return !isTokenExpired(token) && extractUsername(token).equals(principalDetail.getUsername());
-    }*/
+
+    // 유효성 & 탈취 및 위변조 확인
     public boolean validateToken(String token) {
        try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -62,21 +60,22 @@ public class JwtTokenUtil {
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
+        //caims "iss" : 토큰 발행자, "sub" 토큰 대상자, "aud" 토큰 수신자, "exp" 토큰 만료 시간 "nbf" 토큰 유효하기 시작한 시간 "iat" 토큰 발행된 시간 "jti" 토큰 식별자
+        // 우리는 sub, iat, exp 가 있음
         return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        } catch (Exception e){
+            System.out.println("유효하지 않은 토큰입니다."+e.getMessage());
+            return null;
+        }
     }
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
 
 }

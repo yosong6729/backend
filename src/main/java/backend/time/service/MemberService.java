@@ -40,22 +40,19 @@ public class MemberService {
     }
 
     //액세스 토큰과 리프레시 토큰을 얻기 위함
-    public String getReturnAccessToken(String code) {
+/*    public String getReturnAccessToken(String code) {
         System.out.println(code);
         String access_token = "";
         String refresh_token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token"; //토큰 받기
         try {
-            System.out.println("1");
             URL url = new URL(reqURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            System.out.println("2");
 
             //HttpURLConnection 설정 값 셋팅(필수 헤더 세팅)
             con.setRequestMethod("POST"); //인증 토큰 전송
             con.setRequestProperty("Content-type","application/x-www-form-urlencoded"); //인증 토큰 전송
             con.setDoOutput(true); //OutputStream으로 POST 데이터를 넘겨주겠다는 옵션
-            System.out.println("3");
 
             //buffer 스트림 객체 값 셋팅 후 요청
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
@@ -99,7 +96,7 @@ public class MemberService {
             System.out.println("KakaoaccessToken을 불러오지 못함");
         }
         return access_token;
-    }
+    }*/
 
     //사용자 정보 가져오기
     @Transactional
@@ -161,11 +158,16 @@ public class MemberService {
 
     //회원가입(위치 미포함)
     @Transactional
-    public void saveMember(String kakaoId, String nickname){
-        Member member = memberRepository.findByKakaoId(kakaoId)
-                .orElseThrow(()->new IllegalArgumentException("회원이 아닙니다."));
-        member.setRole(Member_Role.USER);
-        member.setNickname(nickname);
+    public boolean saveMember(String kakaoId, String nickname){
+        Optional<Member> member = memberRepository.findByKakaoId(kakaoId);
+        if(member.isEmpty()){
+            return false;
+        }
+        else{
+            member.get().setRole(Member_Role.USER);
+            member.get().setNickname(nickname);
+            return true;
+        }
     }
 
 

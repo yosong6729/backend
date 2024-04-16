@@ -23,8 +23,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private PrincipalDetailService principleDetailService;
 
+//    private static final String NO_CHECK_URL = "/login/jwt";
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         System.out.println("doFilter");
         final String requestTokenHeader = request.getHeader("Authorization");
 
@@ -34,6 +36,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // 헤더에서 토큰 추출
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwt = requestTokenHeader.substring(7);
+
             username =jwtTokenUtil.extractUsername(jwt);
         }
 
@@ -47,8 +50,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
         }
+
         filterChain.doFilter(request, response);
     }
 }

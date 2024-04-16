@@ -17,7 +17,8 @@ public class PrincipalDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId)
                 .orElseThrow(()->{
-                    return new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. : " +kakaoId);
+                    return null;
+//                    return new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. : " +kakaoId);
                 });
         return new PrincipalDetail(member);
     }
