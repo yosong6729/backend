@@ -148,7 +148,7 @@ public class MemberService {
     @Transactional
     public void saveMember(String kakaoId, String nickname){
         Member member = memberRepository.findByKakaoId(kakaoId)
-                .orElseThrow(()->new IllegalArgumentException("허용된 토큰이 아닙니다."));
+                .orElseThrow(()->new IllegalArgumentException("회원이 아닙니다."));
         member.setRole(Member_Role.USER);
         member.setNickname(nickname);
     }

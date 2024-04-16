@@ -67,7 +67,7 @@ public class SecurityConfig  {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .formLogin()
-                .loginProcessingUrl("/login/jwt")
+                .loginProcessingUrl("/kakao/login")
                 .successHandler(kakaoLoginSuccessHandler)
                 .failureHandler(kakaoLoginFailureHandler);
 
