@@ -7,11 +7,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BoardServiceImpl implements BoardService {
+public class BoardServiceImpl{
 
     private final BoardRepository productRepository;
 
-    @Override
     public Board findOne(Long id) {
         return productRepository.findById(id).get();
     }

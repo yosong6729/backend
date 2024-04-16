@@ -1,22 +1,11 @@
 package backend.time.controller;
 
-import backend.time.model.ChatRoom;
-import backend.time.model.Member;
-import backend.time.model.board.Board;
 import backend.time.service.BoardService;
 import backend.time.service.ChattingService;
 import backend.time.service.MemberService;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
