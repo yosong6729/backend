@@ -1,5 +1,6 @@
 package backend.time.dto.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -11,6 +12,8 @@ import java.util.List;
 public class BoardDto {
 
     private String category;
+
+    private String boardType;
 
     @NotEmpty
     @Length(max = 20)
@@ -27,11 +30,10 @@ public class BoardDto {
     private String content;
 
     //지도
-    @NotEmpty
     private String address;
-    @NotEmpty
+
     private Double latitude;
-    @NotEmpty
+
     private Double longitude;
 
 

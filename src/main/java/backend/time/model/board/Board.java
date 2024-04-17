@@ -1,6 +1,7 @@
 package backend.time.model.board;
 
 import backend.time.model.Member;
+import backend.time.model.Scrap;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,9 +33,8 @@ public class Board {
 
     private String itemTime; // 해당 시간
 
-    //불필요
-    /*@OneToMany(mappedBy = "board",cascade = CascadeType.ALL)
-    private List<Scrap> scraps = new ArrayList<>();*/
+    @OneToMany(mappedBy = "board",cascade = CascadeType.ALL)
+    private List<Scrap> scraps = new ArrayList<>();
 
     private int chatCount = 0; // 채팅한 사람 수
 
@@ -45,7 +45,10 @@ public class Board {
     private BoardState boardState = BoardState.SALE;
 
     @Enumerated(EnumType.STRING)
-    private BoardCategory boardCategory;
+    private BoardType boardType = BoardType.BUY;
+
+    @Enumerated(EnumType.STRING)
+    private BoardCategory category;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
@@ -56,15 +59,11 @@ public class Board {
 
     //지도 관련
     private String address;
-    private Double latitude;
-    private Double longitude;
+//    //위도경도를 한번에 위치를 나타내는 점
+//    private Point location;
 
-    //불필요
-/*
-    @Column(name = "modified_date")
-    @CreationTimestamp
-    private Timestamp modifiedDate;
-*/
+    private Double longitude;
+    private Double latitude;
 
     //신고와 이의 신청은 다르지 ?
     // 신고는 게시글 신고, 유저 신고
