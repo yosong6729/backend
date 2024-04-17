@@ -1,5 +1,6 @@
 package backend.time.service;
 
+
 import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
@@ -53,6 +54,10 @@ public class BoardService {
         findMember.setLongitude(pointDto.getLongitude());
         findMember.setLatitude(pointDto.getLatitude());
         findMember.setAddress(pointDto.getAddress());
+    }
+
+    public Board findOne(Long id) {
+        return boardRepository.findById(id).get();
     }
 
     @Transactional
@@ -149,4 +154,5 @@ public class BoardService {
 
         return boardRepository.findAll(spec, pageable);
     }
+
 }
