@@ -1,5 +1,6 @@
 package backend.time.service;
 
+
 import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
@@ -12,10 +13,6 @@ import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.specification.BoardSpecification;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,11 +36,6 @@ public class BoardService {
     final private ImageManager imageManager;
     final private MemberRepository memberRepository;
 
-    public Point createPoint(double longitude, double latitude) {
-        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        return geometryFactory.createPoint(new Coordinate(longitude, latitude));
-    }
-
     @Transactional
     public void point(PointDto pointDto, Member member) {
         Member findMember = memberRepository.findById(member.getId())
@@ -53,6 +45,10 @@ public class BoardService {
         findMember.setLongitude(pointDto.getLongitude());
         findMember.setLatitude(pointDto.getLatitude());
         findMember.setAddress(pointDto.getAddress());
+    }
+
+    public Board findOne(Long id) {
+        return boardRepository.findById(id).get();
     }
 
     @Transactional
@@ -149,4 +145,5 @@ public class BoardService {
 
         return boardRepository.findAll(spec, pageable);
     }
+
 }

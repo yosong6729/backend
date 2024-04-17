@@ -27,9 +27,11 @@ public class PrincipalDetail implements UserDetails {
 
     @Override
     public String getPassword() {
+        //비밀번호와 username을 kakaoId로 함 -> 사용자 보안 문제 발생할 수도 있음(네이버같은 경우 보안을 위해 계속해서 비밀번호를 바꾸라고 하는데 우리는 이러한 보안 과정이 없는 것)
+        // 해결방안 , 보안을 위해 refreshToken이나 accessToken의 유효 기간을 줄이기
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(member.getKakaoId());
-        System.out.println("Encoding된 비밀번호" + encodedPassword);
+//        System.out.println("Encoding된 비밀번호" + encodedPassword);
         return encodedPassword;
     }
 
