@@ -61,7 +61,8 @@ public class MemberApiController {
         System.out.println("token " + token.getToken());
         Member member = memberService.getUserInfo(token.getToken());
         if(member == null){
-            return new ResponseDto(HttpStatus.FORBIDDEN.value(), "잘못된 토큰입니다.");
+            data.put("kakaoId",null);
+            return new ResponseDto(HttpStatus.FORBIDDEN.value(), data);
         }
         else{
             data.put("kakaoId",member.getKakaoId());
