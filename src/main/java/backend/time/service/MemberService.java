@@ -1,8 +1,6 @@
 package backend.time.service;
 
 
-import backend.time.config.auth.PrincipalDetail;
-import backend.time.dto.NicknameDto;
 import backend.time.exception.MemberNotFoundException;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
@@ -42,19 +40,22 @@ public class MemberService {
     }
 
     //액세스 토큰과 리프레시 토큰을 얻기 위함
-/*    public String getReturnAccessToken(String code) {
+    public String getReturnAccessToken(String code) {
         System.out.println(code);
         String access_token = "";
         String refresh_token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token"; //토큰 받기
         try {
+            System.out.println("1");
             URL url = new URL(reqURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            System.out.println("2");
 
             //HttpURLConnection 설정 값 셋팅(필수 헤더 세팅)
             con.setRequestMethod("POST"); //인증 토큰 전송
             con.setRequestProperty("Content-type","application/x-www-form-urlencoded"); //인증 토큰 전송
             con.setDoOutput(true); //OutputStream으로 POST 데이터를 넘겨주겠다는 옵션
+            System.out.println("3");
 
             //buffer 스트림 객체 값 셋팅 후 요청
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
@@ -95,13 +96,14 @@ public class MemberService {
             bw.close();
 
         } catch (Exception e) {
-            System.out.println("KakaoaccessToken을 불러오지 못함");
+            System.out.println("여기...?");
+            e.printStackTrace();
         }
         return access_token;
-    }*/
+    }
 
-    //사용자 정보 가져오기
-    @Transactional
+
+    //kakao에게 회원 id 요청
     public Member getUserInfo(String access_token){
         Map<String, Object> resultMap = new HashMap<>();
         String reqURL = "https://kapi.kakao.com/v2/user/me"; // 사용자 정보 가져오기
@@ -137,19 +139,15 @@ public class MemberService {
             br.close();
 
             //존재하면 resultMap 값 넣어줌
-            if(isOurMember.isPresent()) {
-                return isOurMember.get();
-
-            }
-            else{
-                Member member = Member.builder()
+            if(isOurMember.isEmpty()){
+                return Member.builder()
                         .kakaoId(kakaoId)
                         .role(Member_Role.GUEST)
                         .build();
-                memberRepository.save(member);
-                return member;
             }
-            // 우리 앱 회원이 아니면 resultMap는 id만 있음
+            else{
+                return isOurMember.get();
+            }
 
         }
         catch (Exception e){
@@ -172,7 +170,15 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void saveUnfinishMember(String kakaoId){
+            Member member = Member.builder()
+                    .kakaoId(kakaoId)
+                    .role(Member_Role.GUEST)
+                    .build();
+            memberRepository.save(member);
 
+    }
     // 닉네임 중복 검사
     public boolean isNicknameDuplicated(String nickname){
         // 중복 됨
