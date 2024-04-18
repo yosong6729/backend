@@ -5,6 +5,8 @@ import backend.time.model.ChatRoom;
 import backend.time.model.ChatType;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,6 +17,7 @@ public class ChatDto {
     private String writer;
     private String message;
     private ChatType type;
+    private LocalDateTime localDateTime = LocalDateTime.now();
 
     public ChatMessage toEntity(ChatRoom chatRoom){
         ChatMessage chat = ChatMessage.builder()

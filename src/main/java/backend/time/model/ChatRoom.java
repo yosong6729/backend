@@ -55,28 +55,28 @@ public class ChatRoom {
     }
 
 
-    @Override
-    public String toString() {
-        return "ChatRoom{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", board=" + board +
-                ", buyer=" + buyer +
-                ", chatMessageList=" + chatMessageList +
-                ", createDate=" + createDate +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChatRoom chatRoom = (ChatRoom) o;
-        return Objects.equals(getId(), chatRoom.getId()) && Objects.equals(getName(), chatRoom.getName()) && Objects.equals(getBoard(), chatRoom.getBoard()) && Objects.equals(getBuyer(), chatRoom.getBuyer()) && Objects.equals(getChatMessageList(), chatRoom.getChatMessageList()) && Objects.equals(getCreateDate(), chatRoom.getCreateDate());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName(), getBoard(), getBuyer(), getChatMessageList(), getCreateDate());
-    }
+//    @Override
+//    public String toString() {
+//        return "ChatRoom{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", board=" + board +
+//                ", buyer=" + buyer +
+//                ", chatMessageList=" + chatMessageList +
+//                ", createDate=" + createDate +
+//                '}';
+//    }
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        ChatRoom chatRoom = (ChatRoom) o;
+//        return Objects.equals(getId(), chatRoom.getId()) && Objects.equals(getName(), chatRoom.getName()) && Objects.equals(getBoard(), chatRoom.getBoard()) && Objects.equals(getBuyer(), chatRoom.getBuyer()) && Objects.equals(getChatMessageList(), chatRoom.getChatMessageList()) && Objects.equals(getCreateDate(), chatRoom.getCreateDate());
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(getId(), getName(), getBoard(), getBuyer(), getChatMessageList(), getCreateDate());
+//    }
 }

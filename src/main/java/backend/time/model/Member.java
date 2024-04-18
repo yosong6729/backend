@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -41,4 +42,32 @@ public class Member {
 
     private Double latitude;
     private Double longitude;
+
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Member member = (Member) o;
+//        return Objects.equals(getId(), member.getId()) && Objects.equals(getKakaoId(), member.getKakaoId()) && Objects.equals(getNickname(), member.getNickname()) && getRole() == member.getRole() && Objects.equals(getMannerTime(), member.getMannerTime()) && Objects.equals(getCreateDate(), member.getCreateDate()) && Objects.equals(getAddress(), member.getAddress()) && Objects.equals(getLatitude(), member.getLatitude()) && Objects.equals(getLongitude(), member.getLongitude());
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(getId(), getKakaoId(), getNickname(), getRole(), getMannerTime(), getCreateDate(), getAddress(), getLatitude(), getLongitude());
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "Member{" +
+//                "id=" + id +
+//                ", kakaoId='" + kakaoId + '\'' +
+//                ", nickname='" + nickname + '\'' +
+//                ", role=" + role +
+//                ", mannerTime=" + mannerTime +
+//                ", createDate=" + createDate +
+//                ", address='" + address + '\'' +
+//                ", latitude=" + latitude +
+//                ", longitude=" + longitude +
+//                '}';
+//    }
 }
