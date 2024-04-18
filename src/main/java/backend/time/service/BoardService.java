@@ -12,6 +12,7 @@ import backend.time.model.board.BoardType;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.specification.BoardSpecification;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ public class BoardService {
     final private BoardRepository boardRepository;
     final private ImageManager imageManager;
     final private MemberRepository memberRepository;
+    final private EntityManager entityManager;
 
     @Transactional
     public void point(PointDto pointDto, Member member) {
@@ -45,6 +47,7 @@ public class BoardService {
         findMember.setLongitude(pointDto.getLongitude());
         findMember.setLatitude(pointDto.getLatitude());
         findMember.setAddress(pointDto.getAddress());
+        entityManager.flush();
     }
 
     public Board findOne(Long id) {
