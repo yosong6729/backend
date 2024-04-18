@@ -37,8 +37,71 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> {throw new MemberNotFoundException();});
     }
 
+    //액세스 토큰과 리프레시 토큰을 얻기 위함
+    public String getReturnAccessToken(String code) {
+        System.out.println(code);
+        String access_token = "";
+        String refresh_token = "";
+        String reqURL = "https://kauth.kakao.com/oauth/token"; //토큰 받기
+        try {
+            System.out.println("1");
+            URL url = new URL(reqURL);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            System.out.println("2");
+
+            //HttpURLConnection 설정 값 셋팅(필수 헤더 세팅)
+            con.setRequestMethod("POST"); //인증 토큰 전송
+            con.setRequestProperty("Content-type","application/x-www-form-urlencoded"); //인증 토큰 전송
+            con.setDoOutput(true); //OutputStream으로 POST 데이터를 넘겨주겠다는 옵션
+            System.out.println("3");
+
+            //buffer 스트림 객체 값 셋팅 후 요청
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
+            StringBuilder sb = new StringBuilder();
+            sb.append("grant_type=authorization_code");
+            sb.append("&client_id=").append("e9bae5955920774f4b427d206bb20954"); // 앱 KEY VALUE
+            sb.append("&redirect_uri=").append("http://localhost:8080/oauth/kakao");
+            sb.append("&code=" + code);
+            bw.write(sb.toString());
+            System.out.println("sb="+sb);
+            bw.flush();
+            con.connect();
+
+            int responseCode = con.getResponseCode();
+            String r = con.getResponseMessage();
+            System.out.println("responseCode지롱 : "+r);
+            System.out.println("responseCode"+responseCode);
+            //RETURN 값 result 변수에 저장
+            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(),"UTF-8"));
+
+            String br_line = "";
+            String result = "";
+
+            while ((br_line = br.readLine()) != null) {
+                result += br_line;
+                System.out.println(result);
+            }
+            System.out.println("result"+result);
+
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(result);
+
+            //토큰 값 저장 및 리턴
+            access_token = element.getAsJsonObject().get("access_token").getAsString();
+            refresh_token = element.getAsJsonObject().get("refresh_token").getAsString();
+
+            br.close();
+            bw.close();
+
+        } catch (Exception e) {
+            System.out.println("여기...?");
+            e.printStackTrace();
+        }
+        return access_token;
+    }
+
+
     //kakao에게 회원 id 요청
-    @Transactional
     public Member getUserInfo(String access_token){
         Map<String, Object> resultMap = new HashMap<>();
         String reqURL = "https://kapi.kakao.com/v2/user/me"; // 사용자 정보 가져오기
@@ -74,17 +137,14 @@ public class MemberService {
             br.close();
 
             //존재하면 resultMap 값 넣어줌
-            if(isOurMember.isPresent()) {
-                return isOurMember.get();
-
-            }
-            else{
-                Member member = Member.builder()
+            if(isOurMember.isEmpty()){
+                return Member.builder()
                         .kakaoId(kakaoId)
                         .role(Member_Role.GUEST)
                         .build();
-                memberRepository.save(member);
-                return member;
+            }
+            else{
+                return isOurMember.get();
             }
 
         }
@@ -108,7 +168,15 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void saveUnfinishMember(String kakaoId){
+            Member member = Member.builder()
+                    .kakaoId(kakaoId)
+                    .role(Member_Role.GUEST)
+                    .build();
+            memberRepository.save(member);
 
+    }
     // 닉네임 중복 검사
     public boolean isNicknameDuplicated(String nickname){
         // 중복 됨

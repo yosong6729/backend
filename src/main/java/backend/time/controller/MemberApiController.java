@@ -5,6 +5,7 @@ import backend.time.config.auth.PrincipalDetailService;
 import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.*;
 import backend.time.model.Member;
+import backend.time.model.Member_Role;
 import backend.time.service.MemberService;
 import ch.qos.logback.core.subst.Token;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,15 @@ public class MemberApiController {
 
     private final StringRedisTemplate redisTemplate;
 
+    @GetMapping("/oauth/kakao")
+    public ResponseDto ex1(@RequestParam(value = "code") String code){
+        System.out.println("token "+code);
+        String token = memberService.getReturnAccessToken(code);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("token",token);
+        return new ResponseDto(HttpStatus.OK.value(), data);
+    }
     //카카오에서 사용자 정보 갖고오기
 
     @PostMapping("kakao/getinfo")
@@ -52,6 +62,9 @@ public class MemberApiController {
             return new ResponseDto(HttpStatus.FORBIDDEN.value(), data);
         }
         else{
+            if(member.getRole().equals(Member_Role.GUEST)) {
+                memberService.saveUnfinishMember(member.getKakaoId());
+            }
             data.put("kakaoId",member.getKakaoId());
             return new ResponseDto(HttpStatus.OK.value(), data);
         }
