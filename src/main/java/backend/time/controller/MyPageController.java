@@ -31,7 +31,7 @@ public class MyPageController {
 
         List<ChatRoomDetailDto> collect = chatRoomList.stream()
                 .map(m -> {ChatRoomDetailDto dto = new ChatRoomDetailDto();
-                    dto.setName(m.getBuyer().getNickname());   //구매자 이름
+                    dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
                     dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
                     dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
 

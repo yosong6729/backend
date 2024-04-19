@@ -54,6 +54,9 @@ public class ChatRoom {
         return getChatMessageList().get(getChatMessageList().size()-1);
     }
 
+    public String getLastChatWriter(){return getLastChat().getWriter();}
+
+
 
 //    @Override
 //    public String toString() {
