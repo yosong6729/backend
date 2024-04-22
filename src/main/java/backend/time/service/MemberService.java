@@ -190,11 +190,8 @@ public class MemberService {
 
     // 닉네임 변경
     @Transactional
-    public boolean changeNickname(PrincipalDetail principalDetail, String nickname){
-        if(principalDetail==null){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
-        }
-        Member isMember = memberRepository.findById(principalDetail.getMember().getId())
+    public boolean changeNickname(Member member, String nickname){
+        Member isMember = memberRepository.findById(member.getId())
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         if(memberRepository.findByNickname(nickname).isEmpty()){ //닉네임이 중복되지 않으면
@@ -209,11 +206,11 @@ public class MemberService {
 
     //회원 탈퇴 (우리 DB에서만 없애는거)
     @Transactional
-    public void deleteMember(PrincipalDetail principalDetail){
-        if(principalDetail==null){
+    public void deleteMember(Member member){
+/*        if(principalDetail==null){
             throw new IllegalArgumentException("잘못된 접근입니다.");
-        }
-        Member isMember = memberRepository.findById(principalDetail.getMember().getId())
+        }*/
+        Member isMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         memberRepository.delete(isMember);
     }

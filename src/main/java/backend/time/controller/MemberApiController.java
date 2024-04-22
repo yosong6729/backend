@@ -73,7 +73,7 @@ public class MemberApiController {
     // 닉네임 변경
     @PutMapping("/nickname/change")
     public ResponseDto changeName(@AuthenticationPrincipal PrincipalDetail principalDetail,@RequestBody @Valid NicknameDto nicknameDto) {
-        Boolean isChange = memberService.changeNickname(principalDetail, nicknameDto.getNickname());
+        Boolean isChange = memberService.changeNickname(principalDetail.getMember(), nicknameDto.getNickname());
         Map<String,Object> data = new HashMap<>();
         data.put("isChange",isChange);
         if(isChange){
@@ -87,7 +87,7 @@ public class MemberApiController {
     // 회원 탈퇴
     @DeleteMapping("/delete/member")
     public ResponseDto deleteMember(@AuthenticationPrincipal PrincipalDetail principalDetail){
-        memberService.deleteMember(principalDetail);
+        memberService.deleteMember(principalDetail.getMember());
         System.out.println("apiController");
         Map<String,Object> data = new HashMap<>();
         data.put("isDelete",true);
