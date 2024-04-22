@@ -4,12 +4,12 @@ package backend.time.service;
 import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
+import backend.time.dto.request.BoardUpdateDto;
 import backend.time.dto.request.PointDto;
 import backend.time.model.Member;
-import backend.time.model.board.Board;
-import backend.time.model.board.BoardCategory;
-import backend.time.model.board.BoardType;
+import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
+import backend.time.repository.ImageRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.specification.BoardSpecification;
 import jakarta.persistence.EntityManager;
@@ -21,11 +21,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
@@ -37,6 +41,7 @@ public class BoardService {
     final private ImageManager imageManager;
     final private MemberRepository memberRepository;
     final private EntityManager entityManager;
+    final private ImageRepository imageRepository;
 
     @Transactional
     public void point(PointDto pointDto, Member member) {
@@ -147,6 +152,54 @@ public class BoardService {
 
 
         return boardRepository.findAll(spec, pageable);
+    }
+
+    @Transactional
+    public void update(Long id, BoardUpdateDto boardUpdateDto) throws IOException {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+        board.setTitle(boardUpdateDto.getTitle());
+        board.setContent(boardUpdateDto.getContent());
+        board.setAddress(boardUpdateDto.getAddress());
+        board.setLongitude(boardUpdateDto.getLongitude());
+        board.setLatitude(boardUpdateDto.getLatitude());
+        board.setBoardState(BoardState.valueOf(boardUpdateDto.getBoardState()));
+        board.setCategory(BoardCategory.valueOf(boardUpdateDto.getCategory()));
+        board.setBoardType(BoardType.valueOf(boardUpdateDto.getBoardType()));
+        List<MultipartFile> images = boardUpdateDto.getImages();
+        //사진 받고 있던 거면 냅두고 없으면 추가 없어진 건 삭제
+        if (!images.isEmpty()) {
+            List<Image> findImages = imageRepository.findByBoard(board);
+            Set<String> imageNames = images.stream()
+                    .map(MultipartFile::getOriginalFilename)
+                    .collect(Collectors.toSet());
+
+            findImages.removeIf(findImage -> {
+                boolean toDelete = !imageNames.contains(findImage.getStoredFileName());
+                if (toDelete) {
+                    board.removeImage(findImage);
+                    imageRepository.delete(findImage); // 이미지 삭제
+                }
+                return toDelete;
+            });
+            List<MultipartFile> newImages = new ArrayList<>();
+            // 새로운 이미지 추가
+            for (MultipartFile image : images) {
+                if (findImages.stream().noneMatch(findImage -> Objects.equals(findImage.getStoredFileName(), image.getOriginalFilename()))) {
+                    newImages.add(image);
+                }
+            }
+            List<Image> imageList = imageManager.saveImages(newImages, board);
+
+            for (Image image : imageList) {
+                board.addImage(image);
+            }
+        }
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        boardRepository.deleteById(id);
     }
 
 }
