@@ -192,9 +192,6 @@ public class BoardApiController {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        if(principalDetail==null){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
-        }
         if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
@@ -209,9 +206,6 @@ public class BoardApiController {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        if(principalDetail==null){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
-        }
         if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
