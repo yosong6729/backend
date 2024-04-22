@@ -63,9 +63,15 @@ public class JwtTokenUtil {
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
+//        System.out.println("claims는"+claims);
+        if(claims == null){
+            return null;
+        }
+        else{
+            return claimsResolver.apply(claims);
+        }
         //caims "iss" : 토큰 발행자, "sub" 토큰 대상자, "aud" 토큰 수신자, "exp" 토큰 만료 시간 "nbf" 토큰 유효하기 시작한 시간 "iat" 토큰 발행된 시간 "jti" 토큰 식별자
         // 우리는 sub, iat, exp 가 있음
-        return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {

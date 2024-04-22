@@ -38,7 +38,7 @@ public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
         //여기서 회원가입으로 빠지게 할거임
 
         PrincipalDetail principalDetail = (PrincipalDetail) authentication.getPrincipal();
-        System.out.println("사용자" + principalDetail.getUsername() + " 가 로그인했습니다.");
+//        System.out.println("사용자" + principalDetail.getUsername() + " 가 로그인했습니다.");
 
         if (principalDetail.getMember().getRole() == Member_Role.USER) { // 회원일 경우
             //access 토큰 생성

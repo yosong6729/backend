@@ -50,8 +50,8 @@ public class MemberApiController {
         data.put("token",token);
         return new ResponseDto(HttpStatus.OK.value(), data);
     }
-    //카카오에서 사용자 정보 갖고오기
 
+    //카카오에서 사용자 정보 갖고오기
     @PostMapping("kakao/getinfo")
     public ResponseDto getInfo(@RequestBody TokenDto token) {
         Map<String, Object> data = new HashMap<>();
@@ -73,7 +73,7 @@ public class MemberApiController {
     // 닉네임 변경
     @PutMapping("/nickname/change")
     public ResponseDto changeName(@AuthenticationPrincipal PrincipalDetail principalDetail,@RequestBody @Valid NicknameDto nicknameDto) {
-        Boolean isChange = memberService.changeNickname(principalDetail.getMember(), nicknameDto.getNickname());
+        Boolean isChange = memberService.changeNickname(principalDetail, nicknameDto.getNickname());
         Map<String,Object> data = new HashMap<>();
         data.put("isChange",isChange);
         if(isChange){
@@ -87,7 +87,8 @@ public class MemberApiController {
     // 회원 탈퇴
     @DeleteMapping("/delete/member")
     public ResponseDto deleteMember(@AuthenticationPrincipal PrincipalDetail principalDetail){
-        memberService.deleteMember(principalDetail.getMember());
+        memberService.deleteMember(principalDetail);
+        System.out.println("apiController");
         Map<String,Object> data = new HashMap<>();
         data.put("isDelete",true);
 

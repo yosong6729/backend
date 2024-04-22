@@ -155,4 +155,7 @@ public class BoardService {
         return boardRepository.findAll(spec, pageable);
     }
 
+    // 스크랩 목록
+
+
 }

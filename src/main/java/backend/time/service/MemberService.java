@@ -1,6 +1,7 @@
 package backend.time.service;
 
 
+import backend.time.config.auth.PrincipalDetail;
 import backend.time.exception.MemberNotFoundException;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
@@ -36,6 +37,7 @@ public class MemberService {
     public Member findOne(Long memberId){
         return memberRepository.findById(memberId).orElseThrow(() -> {throw new MemberNotFoundException();});
     }
+
 
     //액세스 토큰과 리프레시 토큰을 얻기 위함
     public String getReturnAccessToken(String code) {
@@ -99,7 +101,6 @@ public class MemberService {
         }
         return access_token;
     }
-
 
     //kakao에게 회원 id 요청
     public Member getUserInfo(String access_token){
@@ -187,8 +188,11 @@ public class MemberService {
 
     // 닉네임 변경
     @Transactional
-    public boolean changeNickname(Member member, String nickname){
-        Member isMember = memberRepository.findById(member.getId())
+    public boolean changeNickname(PrincipalDetail principalDetail, String nickname){
+        if(principalDetail==null){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        Member isMember = memberRepository.findById(principalDetail.getMember().getId())
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         if(memberRepository.findByNickname(nickname).isEmpty()){ //닉네임이 중복되지 않으면
@@ -202,8 +206,11 @@ public class MemberService {
 
     //회원 탈퇴 (우리 DB에서만 없애는거)
     @Transactional
-    public void deleteMember(Member member){
-        Member isMember = memberRepository.findById(member.getId())
+    public void deleteMember(PrincipalDetail principalDetail){
+        if(principalDetail==null){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        Member isMember = memberRepository.findById(principalDetail.getMember().getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         memberRepository.delete(isMember);
     }
