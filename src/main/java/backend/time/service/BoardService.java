@@ -154,10 +154,6 @@ public class BoardService {
         return boardRepository.findAll(spec, pageable);
     }
 
-<<<<<<< HEAD
-    // 스크랩 목록
-
-=======
     @Transactional
     public void update(Long id, BoardUpdateDto boardUpdateDto) throws IOException {
         Board board = boardRepository.findById(id)
@@ -205,6 +201,4 @@ public class BoardService {
     public void delete(Long id) {
         boardRepository.deleteById(id);
     }
->>>>>>> c8603b2993dedc0827c57f4026e6eeb106eb86b1
-
 }
