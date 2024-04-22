@@ -50,8 +50,8 @@ public class MemberApiController {
         data.put("token",token);
         return new ResponseDto(HttpStatus.OK.value(), data);
     }
-    //카카오에서 사용자 정보 갖고오기
 
+    //카카오에서 사용자 정보 갖고오기
     @PostMapping("kakao/getinfo")
     public ResponseDto getInfo(@RequestBody TokenDto token) {
         Map<String, Object> data = new HashMap<>();
@@ -88,6 +88,7 @@ public class MemberApiController {
     @DeleteMapping("/delete/member")
     public ResponseDto deleteMember(@AuthenticationPrincipal PrincipalDetail principalDetail){
         memberService.deleteMember(principalDetail.getMember());
+        System.out.println("apiController");
         Map<String,Object> data = new HashMap<>();
         data.put("isDelete",true);
 

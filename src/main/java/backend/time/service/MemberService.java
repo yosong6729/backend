@@ -1,6 +1,7 @@
 package backend.time.service;
 
 
+import backend.time.config.auth.PrincipalDetail;
 import backend.time.exception.MemberNotFoundException;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
@@ -39,6 +40,7 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> {throw new MemberNotFoundException();});
     }
 
+
     //액세스 토큰과 리프레시 토큰을 얻기 위함
     public String getReturnAccessToken(String code) {
         System.out.println(code);
@@ -46,16 +48,13 @@ public class MemberService {
         String refresh_token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token"; //토큰 받기
         try {
-            System.out.println("1");
             URL url = new URL(reqURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            System.out.println("2");
 
             //HttpURLConnection 설정 값 셋팅(필수 헤더 세팅)
             con.setRequestMethod("POST"); //인증 토큰 전송
             con.setRequestProperty("Content-type","application/x-www-form-urlencoded"); //인증 토큰 전송
             con.setDoOutput(true); //OutputStream으로 POST 데이터를 넘겨주겠다는 옵션
-            System.out.println("3");
 
             //buffer 스트림 객체 값 셋팅 후 요청
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
@@ -96,12 +95,10 @@ public class MemberService {
             bw.close();
 
         } catch (Exception e) {
-            System.out.println("여기...?");
-            e.printStackTrace();
+            System.out.println("카카오 토큰 가져오기 실패");
         }
         return access_token;
     }
-
 
     //kakao에게 회원 id 요청
     public Member getUserInfo(String access_token){
@@ -206,6 +203,9 @@ public class MemberService {
     //회원 탈퇴 (우리 DB에서만 없애는거)
     @Transactional
     public void deleteMember(Member member){
+/*        if(principalDetail==null){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }*/
         Member isMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         memberRepository.delete(isMember);
