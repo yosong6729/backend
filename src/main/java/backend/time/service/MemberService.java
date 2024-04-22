@@ -8,6 +8,7 @@ import backend.time.model.Member_Role;
 import backend.time.repository.MemberRepository;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
 
     public Member findMember(String kakaoId) {
         return memberRepository.findByKakaoId(kakaoId).orElseThrow(()->{throw new MemberNotFoundException();});
@@ -197,6 +199,7 @@ public class MemberService {
 
         if(memberRepository.findByNickname(nickname).isEmpty()){ //닉네임이 중복되지 않으면
             isMember.setNickname(nickname);
+            entityManager.flush();
             return true;
         }
         else{

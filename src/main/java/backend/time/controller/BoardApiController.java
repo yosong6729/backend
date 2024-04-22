@@ -5,14 +5,15 @@ import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.ResponseDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
+import backend.time.dto.request.BoardUpdateDto;
 import backend.time.dto.request.PointDto;
 import backend.time.model.Member;
-import backend.time.model.board.Board;
-import backend.time.model.board.BoardState;
+import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.service.BoardService;
 import jakarta.validation.Valid;
+import jdk.jfr.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -159,6 +158,93 @@ public class BoardApiController {
 //
 //        return new Result<>(responseWrapper);
 //    }
+
+    @GetMapping("/api/board/{id}")
+    public Result boardDetail(@PathVariable Long id){
+        Board board = boardRepository.findById(id)
+                .orElseThrow(()->new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+        BoardDetailResponseDto boardDetailResponseDto = new BoardDetailResponseDto();
+        boardDetailResponseDto.setBoardId(board.getId());
+        boardDetailResponseDto.setNickname(board.getMember().getNickname());
+        boardDetailResponseDto.setMannerTime(board.getMember().getMannerTime());
+        boardDetailResponseDto.setTitle(board.getTitle());
+        boardDetailResponseDto.setContent(board.getContent());
+        boardDetailResponseDto.setCreatedDate(board.getCreateDate());
+        boardDetailResponseDto.setChatCount(board.getChatCount());
+        boardDetailResponseDto.setScrapCount(board.getScrapCount());
+        boardDetailResponseDto.setAddress(board.getAddress());
+        boardDetailResponseDto.setLongitude(board.getLongitude());
+        boardDetailResponseDto.setLatitude(board.getLatitude());
+        boardDetailResponseDto.setBoardState(board.getBoardState());
+        boardDetailResponseDto.setCategory(board.getCategory());
+        boardDetailResponseDto.setBoardType(board.getBoardType());
+        List<Image> images = board.getImages();
+        List<String> collect = images.stream().map(Image::getStoredFileName)
+                .toList();
+        boardDetailResponseDto.setImages(collect);
+
+        return new Result<>(boardDetailResponseDto);
+    }
+
+    //게시글 수정
+    @PutMapping("/api/auth/board/{id}")
+    public ResponseDto<String> updateBoard(@PathVariable Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+
+        if(principalDetail==null){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
+        boardService.update(id, boardUpdateDto);
+        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
+    }
+
+    //게시글 삭제
+    @DeleteMapping("/api/auth/board/{id}")
+    public ResponseDto<String> deleteBoard(@PathVariable Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+
+        if(principalDetail==null){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
+        boardService.delete(id);
+        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 삭제 완료");
+    }
+
+    @Data
+    public class BoardDetailResponseDto{
+        //boardId 게시글 식별자
+        private Long boardId;
+        //글쓴 사람 닉네임, 틈새시간
+        private String nickname;
+        private Long mannerTime;
+        //글의 기본 정보 (제목,내용,글쓴날짜)
+        private String title;
+        private String content;
+        private Timestamp createdDate;
+        //채팅수, 스크랩수
+        private int chatCount;
+        private int scrapCount;
+        //글에 담겨있는 주소 정보 (주소, 경도, 위도)
+        private String address;
+        private Double longitude;
+        private Double latitude;
+        //board 가테고리, state, type
+        private BoardState boardState;
+        private BoardCategory category;
+        private BoardType boardType;
+        //이미지들
+        private List<String> images;
+    }
 
     @Data
     public class UserAddressResponseDto{
