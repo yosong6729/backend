@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-public class ScrapExController {
+public class ScrapApiController {
     private final ScrapService scrapService;
 
     // 스크랩 하기 & 스크랩 취소

@@ -6,6 +6,7 @@ import backend.time.model.board.Board;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.ScrapRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,8 @@ public class ScrapService {
     }
     // 스크랩 목록 가져오기
     public void getScrapList(Member member){
+        scrapRepository.findById(member.getId())
+                .orElseThrow(()->new IllegalArgumentException("해당 멤버는 존재하지 않습니다."));
 
     }
 }
