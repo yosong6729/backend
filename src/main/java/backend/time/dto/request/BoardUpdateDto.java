@@ -11,13 +11,15 @@ public class BoardUpdateDto {
     private String title;
     private String content;
 
+    private String time;
+    private Long price;
+
     //글에 담겨있는 주소 정보 (주소, 경도, 위도)
     private String address;
     private Double longitude;
     private Double latitude;
 
-    //board 가테고리, state, type
-    private String boardState;
+    //board 가테고리, type
     private String category;
     private String boardType;
 

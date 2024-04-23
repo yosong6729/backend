@@ -160,10 +160,11 @@ public class BoardService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
         board.setTitle(boardUpdateDto.getTitle());
         board.setContent(boardUpdateDto.getContent());
+        board.setItemPrice(boardUpdateDto.getPrice());
+        board.setItemTime(boardUpdateDto.getTime());
         board.setAddress(boardUpdateDto.getAddress());
         board.setLongitude(boardUpdateDto.getLongitude());
         board.setLatitude(boardUpdateDto.getLatitude());
-        board.setBoardState(BoardState.valueOf(boardUpdateDto.getBoardState()));
         board.setCategory(BoardCategory.valueOf(boardUpdateDto.getCategory()));
         board.setBoardType(BoardType.valueOf(boardUpdateDto.getBoardType()));
         List<MultipartFile> images = boardUpdateDto.getImages();

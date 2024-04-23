@@ -2,15 +2,18 @@ package backend.time.controller;
 
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.dto.BoardDistanceDto;
+import backend.time.dto.BoardListResponseDto;
 import backend.time.dto.ResponseDto;
 import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
 import backend.time.dto.request.BoardUpdateDto;
 import backend.time.dto.request.PointDto;
 import backend.time.model.Member;
+import backend.time.model.Scrap;
 import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
+import backend.time.repository.ScrapRepository;
 import backend.time.service.BoardService;
 import jakarta.validation.Valid;
 import jdk.jfr.Category;
@@ -35,6 +38,7 @@ public class BoardApiController {
     final private BoardService boardService;
     final private BoardRepository boardRepository;
     final private MemberRepository memberRepository;
+    private final ScrapRepository scrapRepository;
 
     //user 위치 넣기
     @PostMapping("/api/auth/point")
@@ -52,21 +56,21 @@ public class BoardApiController {
 //        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
 //    }
 
-    //게시글 작성
-    @PostMapping("/api/auth/board")
-    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-        boardService.write(boardDto, principalDetail.getMember());
-        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
-    }
-
-//    //게시글 작성 test
+//    //게시글 작성
 //    @PostMapping("/api/auth/board")
-//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto) throws IOException {
-//        Member member = memberRepository.findById(1L)
-//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-//        boardService.write(boardDto, member);
+//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+//        boardService.write(boardDto, principalDetail.getMember());
 //        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
 //    }
+
+    //게시글 작성 test
+    @PostMapping("/api/auth/board")
+    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto) throws IOException {
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+        boardService.write(boardDto, member);
+        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
+    }
 
     //글 조회(검색)
     @GetMapping("/api/board")
@@ -159,12 +163,21 @@ public class BoardApiController {
 //        return new Result<>(responseWrapper);
 //    }
 
+    //글 상세보기
     @GetMapping("/api/board/{id}")
-    public Result boardDetail(@PathVariable Long id){
+    public Result boardDetail(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("해당 글이 존재하지 않습니다."));
         BoardDetailResponseDto boardDetailResponseDto = new BoardDetailResponseDto();
         boardDetailResponseDto.setBoardId(board.getId());
+        Optional<Scrap> scrap = scrapRepository.findByMemberIdAndBoardId(principalDetail.getMember().getId(), id);
+        if(scrap.isEmpty()){
+            boardDetailResponseDto.setScrapStus("NO");
+        }
+        else {
+            boardDetailResponseDto.setScrapStus("YES");
+        }
+        boardDetailResponseDto.setUserId(board.getMember().getId());
         boardDetailResponseDto.setNickname(board.getMember().getNickname());
         boardDetailResponseDto.setMannerTime(board.getMember().getMannerTime());
         boardDetailResponseDto.setTitle(board.getTitle());
@@ -186,13 +199,30 @@ public class BoardApiController {
         return new Result<>(boardDetailResponseDto);
     }
 
-    //게시글 수정
+//    //게시글 수정
+//    @PutMapping("/api/auth/board/{id}")
+//    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+//        Board board = boardRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+//
+//        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+//            throw new IllegalArgumentException("잘못된 접근입니다.");
+//        }
+//
+//        boardService.update(id, boardUpdateDto);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
+//    }
+
+    //게시글 수정 test
     @PutMapping("/api/auth/board/{id}")
-    public ResponseDto<String> updateBoard(@PathVariable Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto) throws IOException {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+
+        if(!Objects.equals(member.getId(), member.getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
 
@@ -200,13 +230,30 @@ public class BoardApiController {
         return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
     }
 
-    //게시글 삭제
+//    //게시글 삭제
+//    @DeleteMapping("/api/auth/board/{id}")
+//    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+//        Board board = boardRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+//
+//        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+//            throw new IllegalArgumentException("잘못된 접근입니다.");
+//        }
+//
+//        boardService.delete(id);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 삭제 완료");
+//    }
+
+    //게시글 삭제 test
     @DeleteMapping("/api/auth/board/{id}")
-    public ResponseDto<String> deleteBoard(@PathVariable Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id) throws IOException {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+
+        if(!Objects.equals(member.getId(), board.getMember().getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
 
@@ -218,7 +265,9 @@ public class BoardApiController {
     public class BoardDetailResponseDto{
         //boardId 게시글 식별자
         private Long boardId;
+        private String scrapStus;
         //글쓴 사람 닉네임, 틈새시간
+        private Long userId;
         private String nickname;
         private Long mannerTime;
         //글의 기본 정보 (제목,내용,글쓴날짜)
@@ -246,18 +295,18 @@ public class BoardApiController {
         private Double userLatitude;
         private String address;
     }
-    @Data
-    public class BoardListResponseDto {
-        private Long boardId;
-        private String title;
-        private Timestamp createdDate;
-        private int chatCount;
-        private int scrapCount;
-        private Double distance;
-        private String address;
-        private BoardState boardState;
-        private String firstImage;
-        }
+//    @Data
+//    public class BoardListResponseDto {
+//        private Long boardId;
+//        private String title;
+//        private Timestamp createdDate;
+//        private int chatCount;
+//        private int scrapCount;
+//        private Double distance;
+//        private String address;
+//        private BoardState boardState;
+//        private String firstImage;
+//        }
 
     @Data
     public class BoardResponseWrapper {
