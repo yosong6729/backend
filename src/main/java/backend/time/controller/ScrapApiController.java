@@ -70,6 +70,8 @@ public class ScrapApiController {
             BoardListResponseDto dto = new BoardListResponseDto();
             dto.setBoardId(board.getId());
             dto.setTitle(board.getTitle());
+            dto.setItemTime(board.getItemTime());
+            dto.setItemPrice(board.getItemPrice());
             dto.setCreatedDate(board.getCreateDate());
             dto.setChatCount(board.getChatCount());
             dto.setScrapCount(board.getScrapCount());

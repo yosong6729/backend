@@ -56,21 +56,21 @@ public class BoardApiController {
 //        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
 //    }
 
-//    //게시글 작성
-//    @PostMapping("/api/auth/board")
-//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-//        boardService.write(boardDto, principalDetail.getMember());
-//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
-//    }
-
-    //게시글 작성 test
+    //게시글 작성
     @PostMapping("/api/auth/board")
-    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto) throws IOException {
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-        boardService.write(boardDto, member);
+    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        boardService.write(boardDto, principalDetail.getMember());
         return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
     }
+
+//    //게시글 작성 test
+//    @PostMapping("/api/auth/board")
+//    public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto) throws IOException {
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//        boardService.write(boardDto, member);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
+//    }
 
     //글 조회(검색)
     @GetMapping("/api/board")
@@ -92,6 +92,8 @@ public class BoardApiController {
             BoardListResponseDto dto = new BoardListResponseDto();
             dto.setBoardId(board.getId());
             dto.setTitle(board.getTitle());
+            dto.setItemPrice(board.getItemPrice());
+            dto.setItemTime(board.getItemTime());
             dto.setCreatedDate(board.getCreateDate());
             dto.setChatCount(board.getChatCount());
             dto.setScrapCount(board.getScrapCount());
@@ -182,6 +184,8 @@ public class BoardApiController {
         boardDetailResponseDto.setMannerTime(board.getMember().getMannerTime());
         boardDetailResponseDto.setTitle(board.getTitle());
         boardDetailResponseDto.setContent(board.getContent());
+        boardDetailResponseDto.setItemPrice(board.getItemPrice());
+        boardDetailResponseDto.setItemTime(board.getItemTime());
         boardDetailResponseDto.setCreatedDate(board.getCreateDate());
         boardDetailResponseDto.setChatCount(board.getChatCount());
         boardDetailResponseDto.setScrapCount(board.getScrapCount());
@@ -199,30 +203,13 @@ public class BoardApiController {
         return new Result<>(boardDetailResponseDto);
     }
 
-//    //게시글 수정
-//    @PutMapping("/api/auth/board/{id}")
-//    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-//        Board board = boardRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
-//
-//        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
-//            throw new IllegalArgumentException("잘못된 접근입니다.");
-//        }
-//
-//        boardService.update(id, boardUpdateDto);
-//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
-//    }
-
-    //게시글 수정 test
+    //게시글 수정
     @PutMapping("/api/auth/board/{id}")
-    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto) throws IOException {
+    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-
-        if(!Objects.equals(member.getId(), member.getId())){
+        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
 
@@ -230,36 +217,53 @@ public class BoardApiController {
         return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
     }
 
-//    //게시글 삭제
-//    @DeleteMapping("/api/auth/board/{id}")
-//    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+//    //게시글 수정 test
+//    @PutMapping("/api/auth/board/{id}")
+//    public ResponseDto<String> updateBoard(@PathVariable("id") Long id, @ModelAttribute @Valid BoardUpdateDto boardUpdateDto) throws IOException {
 //        Board board = boardRepository.findById(id)
 //                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 //
-//        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//
+//        if(!Objects.equals(member.getId(), member.getId())){
 //            throw new IllegalArgumentException("잘못된 접근입니다.");
 //        }
 //
-//        boardService.delete(id);
-//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 삭제 완료");
+//        boardService.update(id, boardUpdateDto);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 수정 완료");
 //    }
 
-    //게시글 삭제 test
+    //게시글 삭제
     @DeleteMapping("/api/auth/board/{id}")
-    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id) throws IOException {
+    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
 
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-
-        if(!Objects.equals(member.getId(), board.getMember().getId())){
+        if(!Objects.equals(principalDetail.getMember().getId(), board.getMember().getId())){
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
 
         boardService.delete(id);
         return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 삭제 완료");
     }
+
+//    //게시글 삭제 test
+//    @DeleteMapping("/api/auth/board/{id}")
+//    public ResponseDto<String> deleteBoard(@PathVariable("id") Long id) throws IOException {
+//        Board board = boardRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+//
+//        Member member = memberRepository.findById(1L)
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+//
+//        if(!Objects.equals(member.getId(), board.getMember().getId())){
+//            throw new IllegalArgumentException("잘못된 접근입니다.");
+//        }
+//
+//        boardService.delete(id);
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 삭제 완료");
+//    }
 
     @Data
     public class BoardDetailResponseDto{
@@ -274,6 +278,8 @@ public class BoardApiController {
         private String title;
         private String content;
         private Timestamp createdDate;
+        private String itemTime;
+        private Long itemPrice;
         //채팅수, 스크랩수
         private int chatCount;
         private int scrapCount;

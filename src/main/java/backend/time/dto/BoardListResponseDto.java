@@ -9,6 +9,8 @@ import java.sql.Timestamp;
 public class BoardListResponseDto {
     private Long boardId;
     private String title;
+    private String itemTime;
+    private Long itemPrice;
     private Timestamp createdDate;
     private int chatCount;
     private int scrapCount;
