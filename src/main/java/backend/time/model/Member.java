@@ -41,4 +41,8 @@ public class Member {
 
     private Double latitude;
     private Double longitude;
+
+    @Builder.Default
+    private Long timePay = 0L; // 기본값으로 0L 설정
+
 }

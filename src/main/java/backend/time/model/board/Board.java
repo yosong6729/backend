@@ -2,6 +2,8 @@ package backend.time.model.board;
 
 import backend.time.model.Member;
 import backend.time.model.Scrap;
+import backend.time.model.pay.PayMethod;
+import backend.time.model.pay.PayStorage;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -49,6 +51,9 @@ public class Board {
 
     @Enumerated(EnumType.STRING)
     private BoardCategory category;
+
+    @Enumerated(EnumType.STRING)
+    private PayMethod payMethod;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
