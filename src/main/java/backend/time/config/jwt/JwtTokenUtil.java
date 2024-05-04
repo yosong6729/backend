@@ -64,7 +64,7 @@ public class JwtTokenUtil {
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
-//        System.out.println("claims는"+claims);
+        System.out.println("claims는"+claims);
         if(claims == null){
             return null;
         }
@@ -77,7 +77,7 @@ public class JwtTokenUtil {
 
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         } catch (Exception e){
             System.out.println("유효하지 않은 토큰입니다."+e.getMessage());
             return null;
