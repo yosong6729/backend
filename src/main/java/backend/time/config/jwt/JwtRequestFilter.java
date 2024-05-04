@@ -39,23 +39,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             username =jwtTokenUtil.extractUsername(jwt);
         }
+        System.out.println("jwtToken : "+ username);
 
         // 추출된 username을 사용하여 인증
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             PrincipalDetail principalDetail = (PrincipalDetail)principleDetailService.loadUserByUsername(username);
             if (jwtTokenUtil.validateToken(jwt)) {
-                System.out.println("유효한 토큰"+principalDetail.getUsername()+", "+principalDetail.getPassword());
+                System.out.println("Valid Tokens"+principalDetail.getUsername()+", "+principalDetail.getPassword());
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principalDetail, null, principalDetail.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
+
         else{ // 토큰이 유효하지 않을 때
 //            exceptionCall(response, "invalidToken");
             filterChain.doFilter(request, response);
             return;
         }
+
 
 
         filterChain.doFilter(request, response);
