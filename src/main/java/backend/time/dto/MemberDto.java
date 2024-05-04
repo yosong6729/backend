@@ -17,10 +17,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class MemberDto {
-    private String kakaoId;
     private String nickname;
     private Long mannerTime;
-    private Member_Role role;
+//    private Member_Role role;
 
 }
 

@@ -2,6 +2,7 @@ package backend.time.service;
 
 
 import backend.time.config.auth.PrincipalDetail;
+import backend.time.dto.MemberDto;
 import backend.time.exception.MemberNotFoundException;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
@@ -209,6 +210,15 @@ public class MemberService {
         Member isMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         memberRepository.delete(isMember);
+    }
+    // 회원 get
+    public MemberDto getProfile(Long id){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        return MemberDto.builder()
+                .nickname(member.getNickname())
+                .mannerTime(member.getMannerTime())
+                .build();
     }
 
 }
