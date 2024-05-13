@@ -15,6 +15,8 @@ import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.repository.ScrapRepository;
 import backend.time.service.BoardService;
+import backend.time.service.ChattingService;
+import backend.time.service.MemberServiceImpl;
 import jakarta.validation.Valid;
 import jdk.jfr.Category;
 import lombok.AllArgsConstructor;
@@ -39,6 +41,8 @@ public class BoardApiController {
     final private BoardRepository boardRepository;
     final private MemberRepository memberRepository;
     private final ScrapRepository scrapRepository;
+    private final MemberServiceImpl memberService;
+    private final ChattingService chattingService;
 
     //user 위치 넣기
     @PostMapping("/api/auth/point")
@@ -168,15 +172,17 @@ public class BoardApiController {
     //글 상세보기
     @GetMapping("/api/board/{id}")
     public Result boardDetail(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetail principalDetail) {
+        Member member = memberService.findMember(principalDetail.getUsername());
         Board board = boardRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않습니다."));
+        //product_id와 member_id(buyer구매자 아이디)로 채팅방 검색후 없으면 새로운 chatRoom 만들고 Chatroom의 .getName을 해서 roomName가져오기
+        String roomName = chattingService.findChatRoomByBuyer(board.getId(), member.getId()).getName();
         BoardDetailResponseDto boardDetailResponseDto = new BoardDetailResponseDto();
         boardDetailResponseDto.setBoardId(board.getId());
         Optional<Scrap> scrap = scrapRepository.findByMemberIdAndBoardId(principalDetail.getMember().getId(), id);
-        if(scrap.isEmpty()){
+        if (scrap.isEmpty()) {
             boardDetailResponseDto.setScrapStus("NO");
-        }
-        else {
+        } else {
             boardDetailResponseDto.setScrapStus("YES");
         }
         boardDetailResponseDto.setUserId(board.getMember().getId());
@@ -199,6 +205,8 @@ public class BoardApiController {
         List<String> collect = images.stream().map(Image::getStoredFileName)
                 .toList();
         boardDetailResponseDto.setImages(collect);
+        boardDetailResponseDto.setRoomName(roomName);
+
 
         return new Result<>(boardDetailResponseDto);
     }
@@ -293,6 +301,8 @@ public class BoardApiController {
         private BoardType boardType;
         //이미지들
         private List<String> images;
+        //채팅방 UUID
+        private String roomName;
     }
 
     @Data
