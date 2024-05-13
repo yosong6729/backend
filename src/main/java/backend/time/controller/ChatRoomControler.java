@@ -3,7 +3,7 @@ package backend.time.controller;
 import backend.time.dto.ChatRoomResponseDto;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.service.ChattingService;
 import backend.time.service.MemberService;
 import lombok.RequiredArgsConstructor;

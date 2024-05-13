@@ -3,7 +3,7 @@ package backend.time.service;
 import backend.time.dto.ChatDto;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.ChatRepository;

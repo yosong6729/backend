@@ -1,24 +1,5 @@
 package backend.time.chat;
 
-import backend.time.dto.ChatDto;
-import backend.time.model.ChatMessage;
-import backend.time.model.ChatRoom;
-import backend.time.model.ChatType;
-import backend.time.model.Member;
-import backend.time.model.board.Board;
-import backend.time.model.board.BoardCategory;
-import backend.time.service.ChattingService;
-import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-
 //@SpringBootTest
 //@Rollback(value = false)
 //class ChattingServiceTest {

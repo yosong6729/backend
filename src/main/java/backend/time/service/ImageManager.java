@@ -1,11 +1,15 @@
 package backend.time.service;
 
+import backend.time.model.Objection.Objection;
+import backend.time.model.Objection.ObjectionImage;
 import backend.time.repository.ImageRepository;
 import backend.time.model.board.Board;
 import backend.time.model.board.Image;
+import backend.time.repository.ObjectionImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -19,6 +23,8 @@ import java.util.UUID;
 public class ImageManager {
 
     final private ImageRepository imageRepository;
+
+    final private ObjectionImageRepository objectionImageRepository;
 
     @Value("${file.dir}")
     private String storePath; //파일 저장할 경로
@@ -73,4 +79,36 @@ public class ImageManager {
         }
         return imageList;
     }
+
+    @Transactional
+    public ObjectionImage saveObjectionImage(MultipartFile multipartFile, Objection objection) throws IOException {
+        if(multipartFile.isEmpty()){
+            return null;
+        }
+        String uploadFileName = multipartFile.getOriginalFilename();
+        String storedFileName = createStoreFileName(uploadFileName);
+        String ext = extractExt(uploadFileName);
+        System.out.println("ext "+ext);
+        multipartFile.transferTo(new File(getImagePath(storedFileName,ext)));
+        ObjectionImage objectionImage = ObjectionImage.builder()
+                .uploadFileName(uploadFileName)
+                .storedFileName(storedFileName)
+                .objection(objection)
+                .build();
+        return objectionImageRepository.save(objectionImage);
+    }
+    public List<ObjectionImage> saveObjectionImages(List<MultipartFile> multipartFiles, Objection objection) throws IOException {
+        List<ObjectionImage> objectionImageList = new ArrayList<>();
+
+        for(MultipartFile multipartFile : multipartFiles) {
+            if(!multipartFile.isEmpty()) {
+                objectionImageList.add(saveObjectionImage(multipartFile, objection));
+            }
+        }
+        return objectionImageList;
+    }
+
+
+
+
 }

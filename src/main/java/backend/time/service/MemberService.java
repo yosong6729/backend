@@ -1,11 +1,15 @@
 package backend.time.service;
 
 
-import backend.time.config.auth.PrincipalDetail;
+import backend.time.dto.EvaluationDto;
+import backend.time.dto.EvaluationResponseDto;
+import backend.time.dto.MannerEvaluationDto;
+import backend.time.dto.ServiceEvaluationDto;
 import backend.time.exception.MemberNotFoundException;
-import backend.time.model.Member;
-import backend.time.model.Member_Role;
-import backend.time.repository.MemberRepository;
+import backend.time.model.Member.*;
+import backend.time.model.Objection.Objection;
+import backend.time.model.board.Board;
+import backend.time.repository.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import jakarta.persistence.EntityManager;
@@ -16,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,6 +28,12 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final EntityManager entityManager;
+    private final BoardRepository boardRepository;
+
+    private final MannerEvaluationRepository mannerEvaluationRepository;
+    private final ServiceEvaluationRepository serviceEvaluationRepository;
+    private final ObjectionRepository objectionRepository;
+    private final ObjectionImageRepository objectionImageRepository;
 
     public Member findMember(String kakaoId) {
         return memberRepository.findByKakaoId(kakaoId).orElseThrow(()->{throw new MemberNotFoundException();});
@@ -207,13 +215,139 @@ public class MemberService {
     //회원 탈퇴 (우리 DB에서만 없애는거)
     @Transactional
     public void deleteMember(Member member){
-/*        if(principalDetail==null){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
-        }*/
         Member isMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+//        objectionImageRepository.deleteAll();
+        if(!boardRepository.findByMember(member).isEmpty()){
+            System.out.println("yes");
+            System.out.println("delete"+boardRepository.findByMember(member).size());
+            boardRepository.deleteAll(boardRepository.findByMember(member));
+        }
+        if(!objectionRepository.findByObjector(member).isEmpty()){
+            List<Objection> objectionList = objectionRepository.findByObjector(member);
+            for(int i=0; i<objectionList.size(); i++){
+                objectionImageRepository.deleteAll(objectionImageRepository.findByObjection(objectionList.get(i)));
+                System.out.println("findbyObjector"+objectionRepository.findByObjector(member).get(i));
+
+            }
+            objectionRepository.deleteAll(objectionRepository.findByObjector(member));
+        }
+
         memberRepository.delete(isMember);
     }
+    @Transactional
+    public void sendEvaluation(Long memberId, Long boardId, EvaluationDto evaluationDto){
+        Board board = boardRepository.findById(boardId) //내가 평가하기 전에 그 사람이 게시물을 삭제하면...? -> 1. 평가를 못받음 2. 매너 평가만 반영
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 게시물입니다."));
+        Member receiver = memberRepository.findById(memberId)
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        // manner 평가 추가
+        sendMannerEvaluation(receiver, evaluationDto.mannerEvaluationDtoList);
+
+        //service 평가
+        sendServiceEvaluation(receiver, board, evaluationDto.serviceEvaluationDtoList);
+
+    }
+
+    public void sendMannerEvaluation(Member receiver, List<MannerEvaluationCategory> mannerEvaluationCategoryList){
+        List<MannerEvaluation> tmpMannerEvaluationList = receiver.getMannerEvaluationList();
+        for(int i=0; i<mannerEvaluationCategoryList.size(); i++){
+            MannerEvaluationCategory mannerEvaluationCategory = mannerEvaluationCategoryList.get(i);
+            Integer isHere = -1;
+            for(int j=0; j<tmpMannerEvaluationList.size(); j++){
+                if(tmpMannerEvaluationList.get(j).getMannerEvaluationCategory().equals(mannerEvaluationCategory)){
+                    isHere = j;
+                    break;
+                }
+            }
+            if(isHere != -1){ // 존재하면 => count + 1
+                Integer tmpCount = tmpMannerEvaluationList.get(isHere).getMannerEvaluationCount()+1;
+                tmpMannerEvaluationList.get(isHere).setMannerEvaluationCount(tmpCount);
+            }
+            else{ //존재하지 않는 평가면 평가 추가 & count = 1
+                MannerEvaluation mannerEvaluation = MannerEvaluation.builder()
+                        .member(receiver)
+                        .mannerEvaluationCategory(mannerEvaluationCategory)
+                        .mannerEvaluationCount(1)
+                        .build();
+                mannerEvaluationRepository.save(mannerEvaluation);
+//                tmpMannerEvaluationList.add(mannerEvaluation);
+            }
+        }
+
+//        receiver.setMannerEvaluationList(tmpMannerEvaluationList);
+    }
+
+
+    public void sendServiceEvaluation(Member receiver, Board board, List<ServiceEvaluationCategory> serviceEvaluationCategoryList) {
+        // board가 없을 경우에는?
+        List<ServiceEvaluation> tmpServiceEvaluationList = receiver.getServiceEvaluationList();
+
+        for (int i = 0; i < serviceEvaluationCategoryList.size(); i++) {
+            ServiceEvaluationCategory serviceEvaluationCategory = serviceEvaluationCategoryList.get(i);
+            Integer isHere = -1;
+            for (int j = 0; j < tmpServiceEvaluationList.size(); j++) {
+                if (tmpServiceEvaluationList.get(j).getServiceEvaluationCategory().equals(serviceEvaluationCategory)) {
+                    isHere = j;
+                    break;
+                }
+            }
+            if (isHere != -1) { // 존재하면 => count + 1
+                Integer tmpCount = tmpServiceEvaluationList.get(isHere).getServiceEvaluationCount() + 1;
+                tmpServiceEvaluationList.get(isHere).setServiceEvaluationCount(tmpCount);
+            } else { //존재하지 않는 평가면 평가 추가 & count = 1
+                ServiceEvaluation serviceEvaluation = ServiceEvaluation.builder()
+                        .member(receiver)
+                        .serviceEvaluationCategory(serviceEvaluationCategory)
+                        .serviceEvaluationCount(1)
+                        .boardCategory(board.getCategory())
+                        .build();
+                serviceEvaluationRepository.save(serviceEvaluation);
+//                tmpServiceEvaluationList.add(serviceEvaluation);
+            }
+        }
+//        receiver.setServiceEvaluationList(tmpServiceEvaluationList);
+
+    }
+
+    public EvaluationResponseDto getEvaluation(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
+        List<MannerEvaluationDto> mannerEvaluationDtoList = new ArrayList<>();
+
+
+//        System.out.println("getMannerEvaluationList size : "+member.getMannerEvaluationList().size() );
+        for(int i=0; i<member.getMannerEvaluationList().size(); i++){
+            MannerEvaluation mannerEvaluation = member.getMannerEvaluationList().get(i);
+            MannerEvaluationDto mannerEvaluationDto = MannerEvaluationDto.builder()
+                    .mannerEvaluationCategory(mannerEvaluation.getMannerEvaluationCategory())
+                    .mannerEvaluationCount(mannerEvaluation.getMannerEvaluationCount())
+                    .build();
+            mannerEvaluationDtoList.add(mannerEvaluationDto);
+        }
+        List<ServiceEvaluationDto> serviceEvaluationDtoList = new ArrayList<>();
+
+//        System.out.println("getServiceEvaluationList size : "+member.getServiceEvaluationList().size() );
+
+        for(int i=0; i<member.getServiceEvaluationList().size(); i++){
+            ServiceEvaluation serviceEvaluation = member.getServiceEvaluationList().get(i);
+            ServiceEvaluationDto serviceEvaluationDto = ServiceEvaluationDto.builder()
+                    .serviceEvaluationCategory(serviceEvaluation.getServiceEvaluationCategory())
+                    .boardCategory(serviceEvaluation.getBoardCategory())
+                    .serviceEvaluationCount(serviceEvaluation.getServiceEvaluationCount())
+                    .build();
+            serviceEvaluationDtoList.add(serviceEvaluationDto);
+        }
+        return EvaluationResponseDto.builder()
+                .mannerEvaluationList(mannerEvaluationDtoList)
+                .serviceEvaluationList(serviceEvaluationDtoList)
+                .build();
+    }
+    //+5점시 매너시간 +5분 -5점시 매너시간 -5분
+    // 통합시간, 서비스 시간이 있는데
+
 
 }
 

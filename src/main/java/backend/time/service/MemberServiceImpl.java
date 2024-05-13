@@ -1,7 +1,7 @@
 package backend.time.service;
 
 import backend.time.exception.MemberNotFoundException;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

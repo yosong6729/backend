@@ -1,6 +1,6 @@
 package backend.time.model.board;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
 import jakarta.persistence.*;
 import lombok.*;

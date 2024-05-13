@@ -1,6 +1,6 @@
 package backend.time.config.auth;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

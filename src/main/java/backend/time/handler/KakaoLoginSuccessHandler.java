@@ -3,7 +3,7 @@ package backend.time.handler;
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.ResponseDto;
-import backend.time.model.Member_Role;
+import backend.time.model.Member.Member_Role;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
