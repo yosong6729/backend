@@ -1,9 +1,5 @@
 package backend.time.dto;
 
-import backend.time.model.ChatMessage;
-import backend.time.model.ChatRoom;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

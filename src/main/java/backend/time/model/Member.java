@@ -3,7 +3,6 @@ package backend.time.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
 

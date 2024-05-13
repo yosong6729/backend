@@ -1,7 +1,5 @@
 package backend.time.service;
 
-import backend.time.dto.BoardDistanceDto;
-import backend.time.dto.request.BoardSearchDto;
 import backend.time.dto.request.ScrapDto;
 import backend.time.model.Member;
 import backend.time.model.Scrap;
@@ -9,7 +7,6 @@ import backend.time.model.board.Board;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.repository.ScrapRepository;
-import backend.time.specification.BoardSpecification;
 import backend.time.specification.ScrapSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,9 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)

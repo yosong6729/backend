@@ -3,12 +3,13 @@ package backend.time.controller;
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.auth.PrincipalDetailService;
 import backend.time.config.jwt.JwtTokenUtil;
-import backend.time.dto.*;
+import backend.time.dto.NicknameDto;
+import backend.time.dto.ResponseDto;
+import backend.time.dto.TokenDto;
+import backend.time.dto.UnfinishedMemberDto;
 import backend.time.model.Member;
 import backend.time.model.Member_Role;
 import backend.time.service.MemberService;
-import ch.qos.logback.core.subst.Token;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,12 +19,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 
