@@ -4,10 +4,10 @@ import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.auth.PrincipalDetailService;
 import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.*;
-import backend.time.model.Member.MannerEvaluation;
+import backend.time.dto.response.EvaluationResponseDto;
+import backend.time.dto.response.MemberResponseDto;
 import backend.time.model.Member.Member;
 import backend.time.model.Member.Member_Role;
-import backend.time.model.Member.ServiceEvaluation;
 import backend.time.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -178,6 +177,17 @@ public class MemberApiController {
     public Result<Object> getEvaluation(@AuthenticationPrincipal PrincipalDetail principalDetail, @PathVariable("id") Long memberId){
         EvaluationResponseDto evaluationResponseDto = memberService.getEvaluation(memberId);
         return new Result<>(evaluationResponseDto);
+    }
+
+    @GetMapping("/member/profile")
+    public Result<Object> getProfile(@AuthenticationPrincipal PrincipalDetail principalDetail){
+        MemberResponseDto memberResponseDto = memberService.getProfile(principalDetail.getMember().getId());
+        return new Result<>(memberResponseDto);
+    }
+    @GetMapping("/member/{id}/profile")
+    public Result<Object> getOtherProfile(@AuthenticationPrincipal PrincipalDetail principalDetail,@PathVariable("id") Long id){
+        MemberResponseDto memberResponseDto = memberService.getOtherProfile(id);
+        return new Result<>(memberResponseDto);
     }
 
     @Data

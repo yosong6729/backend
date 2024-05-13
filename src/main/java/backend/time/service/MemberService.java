@@ -1,10 +1,9 @@
 package backend.time.service;
 
 
-import backend.time.dto.EvaluationDto;
-import backend.time.dto.EvaluationResponseDto;
-import backend.time.dto.MannerEvaluationDto;
-import backend.time.dto.ServiceEvaluationDto;
+import backend.time.dto.*;
+import backend.time.dto.response.EvaluationResponseDto;
+import backend.time.dto.response.MemberResponseDto;
 import backend.time.exception.MemberNotFoundException;
 import backend.time.model.Member.*;
 import backend.time.model.Objection.Objection;
@@ -347,6 +346,23 @@ public class MemberService {
     }
     //+5점시 매너시간 +5분 -5점시 매너시간 -5분
     // 통합시간, 서비스 시간이 있는데
+
+    public MemberResponseDto getProfile(Long id){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()->new IllegalArgumentException("없는 회원입니다."));
+        return MemberResponseDto.builder()
+                .mannerTime(member.getMannerTime())
+                .nickname(member.getNickname())
+                .build();
+    }
+    public MemberResponseDto getOtherProfile(Long id){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()->new IllegalArgumentException("없는 회원입니다."));
+        return MemberResponseDto.builder()
+                .mannerTime(member.getMannerTime())
+                .nickname(member.getNickname())
+                .build();
+    }
 
 
 }

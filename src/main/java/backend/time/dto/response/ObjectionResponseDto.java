@@ -1,4 +1,4 @@
-package backend.time.dto;
+package backend.time.dto.response;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

@@ -1,5 +1,7 @@
-package backend.time.dto;
+package backend.time.dto.response;
 
+import backend.time.dto.MannerEvaluationDto;
+import backend.time.dto.ServiceEvaluationDto;
 import backend.time.model.Member.MannerEvaluation;
 import backend.time.model.Member.ServiceEvaluation;
 import lombok.AllArgsConstructor;
