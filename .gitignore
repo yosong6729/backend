@@ -19,6 +19,7 @@ bin/
 application-mysql.properties
 
 
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
