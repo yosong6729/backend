@@ -1,6 +1,5 @@
 package backend.time.dto.request;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;

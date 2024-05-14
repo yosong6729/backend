@@ -1,8 +1,7 @@
 package backend.time.model;
 
-import jdk.jfr.Enabled;
-
 public enum ChatType {
 
-    MESSAGE, JOIN, LEAVE
+    MESSAGE, JOIN, LEAVE, GOTRANSACTION, COMPLETTRANSACTION,
+    ACCOUNT, PAY, ONTRANSACTION, REVIEW, PAYINFO, SELLERCOMPLETE, APPEAL
 }

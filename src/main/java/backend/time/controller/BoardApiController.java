@@ -5,11 +5,9 @@ import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.BoardListResponseDto;
 import backend.time.dto.ResponseDto;
 import backend.time.dto.request.*;
-import backend.time.model.ChatRoom;
 import backend.time.model.Scrap;
 import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
-import backend.time.repository.ChatRepository;
 import backend.time.repository.ChatRoomRepository;
 import backend.time.repository.ScrapRepository;
 import backend.time.service.BoardService;
@@ -26,7 +24,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,16 +38,8 @@ public class BoardApiController {
     private final BoardService boardService;
     private final BoardRepository boardRepository;
     private final ScrapRepository scrapRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final ChattingService chattingService;
-
-
-//    //user 위치 넣기
-//    @PostMapping("/api/auth/point")
-//    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-//        boardService.point(pointDto, principalDetail.getMember());
-//        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
-//    }
+    private final ChatRoomRepository chatRoomRepository;
 
     //user 위치 넣기
     @PostMapping("/api/auth/point")
@@ -219,20 +212,6 @@ public class BoardApiController {
 //            return new ResponseDto(HttpStatus.OK.value(), "계좌 저장 완료");
 //    }
 
-    //계좌 내보내기
-    @GetMapping("/api/board/{boardId}/chat/{chatId}/account")
-    public Result getAccount(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId) {
-        BoardService.AccountResponseDto dto = boardService.getAccount(boardId, chatId);
-        return new Result<>(dto);
-    }
-
-    //판매자 구매자 알려주기
-    @GetMapping("/api/board/{boardId}/chat/{chatId}/who")
-    public Result getWho(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId, @AuthenticationPrincipal PrincipalDetail principalDetail) {
-        BoardService.WhoResponseDto dto = boardService.buyWho(boardId, chatId, principalDetail.getMember());
-        return new Result<>(dto);
-    }
-
     @Data
     public class BoardDetailResponseDto{
         //roomName 채팅방 있으면 채팅방이름 넘겨주고 없으면 null
@@ -279,7 +258,6 @@ public class BoardApiController {
         private UserAddressResponseDto userAddress;
         private List<BoardListResponseDto> boards;
     }
-
 
     @Data
     @AllArgsConstructor

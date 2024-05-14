@@ -3,7 +3,6 @@ package backend.time.specification;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardCategory;
 import backend.time.model.board.BoardType;
-import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;

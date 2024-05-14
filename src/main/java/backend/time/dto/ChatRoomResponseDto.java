@@ -1,18 +1,16 @@
 package backend.time.dto;
 
-import backend.time.model.ChatMessage;
-import backend.time.model.ChatRoom;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 public class ChatRoomResponseDto {
 
-    ChatRoom room;
-
-    List<ChatMessage> chatlist;
+    Long roomId;
+    String roleType;
+    List<ChatDto> chatlist;
 
 }
