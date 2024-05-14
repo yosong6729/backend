@@ -6,10 +6,10 @@ import backend.time.repository.ImageRepository;
 import backend.time.model.board.Board;
 import backend.time.model.board.Image;
 import backend.time.repository.ObjectionImageRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;

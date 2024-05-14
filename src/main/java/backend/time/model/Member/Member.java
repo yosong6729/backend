@@ -47,6 +47,10 @@ public class Member {
     private Double latitude;
     private Double longitude;
 
+    @Builder.Default
+    private Long timePay = 0L; // 기본값으로 0L 설정
+
+
     //매너 평가
 
     @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, orphanRemoval = true)

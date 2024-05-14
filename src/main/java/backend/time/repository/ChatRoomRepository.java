@@ -1,11 +1,11 @@
 package backend.time.repository;
 
 import backend.time.model.ChatRoom;
+import backend.time.model.board.Board;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +17,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Optional<ChatRoom> findByBoardIdAndBuyerId(Long boardId, Long buyerId);
 
     Optional<ChatRoom> findByName(String name);
+    Optional<ChatRoom> findByBoard(Board board);
 }

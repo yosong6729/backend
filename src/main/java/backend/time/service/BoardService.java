@@ -1,18 +1,23 @@
 package backend.time.service;
 
-
 import backend.time.dto.BoardDistanceDto;
-import backend.time.dto.request.BoardDto;
-import backend.time.dto.request.BoardSearchDto;
-import backend.time.dto.request.BoardUpdateDto;
-import backend.time.dto.request.PointDto;
+import backend.time.dto.request.*;
+import backend.time.model.ChatRoom;
 import backend.time.model.Member.Member;
-import backend.time.model.board.*;
+import backend.time.model.pay.Account;
+import backend.time.model.pay.PayMethod;
+import backend.time.model.pay.PayStorage;
+import backend.time.repository.*;
+import backend.time.model.board.Board;
+import backend.time.model.board.BoardCategory;
+import backend.time.model.board.BoardType;
+import backend.time.model.board.Image;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.ImageRepository;
 import backend.time.repository.MemberRepository;
 import backend.time.specification.BoardSpecification;
 import jakarta.persistence.EntityManager;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +35,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static backend.time.model.board.BoardState.*;
+import static backend.time.model.pay.PayMethod.*;
+import static backend.time.model.board.BoardType.SELL;
+
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -40,13 +49,26 @@ public class BoardService {
     final private MemberRepository memberRepository;
     final private EntityManager entityManager;
     final private ImageRepository imageRepository;
+    final private ChatRoomRepository chatRoomRepository;
+    final private PayStorageRepository payStorageRepository;
+    final private AccountRepository accountRepository;
+
+//    @Transactional
+//    public void point(PointDto pointDto, Member member) {
+//        Member findMember = memberRepository.findById(member.getId())
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+////        Point point = createPoint(pointDto.getLongitude(), pointDto.getLatitude());
+////        findMember.setLocation(point);
+//        findMember.setLongitude(pointDto.getLongitude());
+//        findMember.setLatitude(pointDto.getLatitude());
+//        findMember.setAddress(pointDto.getAddress());
+//        entityManager.flush();
+//    }
 
     @Transactional
-    public void point(PointDto pointDto, Member member) {
-        Member findMember = memberRepository.findById(member.getId())
+    public void point(PointDto pointDto) {
+        Member findMember = memberRepository.findByKakaoId(pointDto.getKakaoId())
                 .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-//        Point point = createPoint(pointDto.getLongitude(), pointDto.getLatitude());
-//        findMember.setLocation(point);
         findMember.setLongitude(pointDto.getLongitude());
         findMember.setLatitude(pointDto.getLatitude());
         findMember.setAddress(pointDto.getAddress());
@@ -156,12 +178,16 @@ public class BoardService {
     public void update(Long id, BoardUpdateDto boardUpdateDto) throws IOException {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+        if(board.getBoardState()==RESERVED || board.getBoardState()==SOLD){
+            throw new IllegalArgumentException("거래 중이거나 판매 완료된 글은 수정할 수 없습니다.");
+        }
         board.setTitle(boardUpdateDto.getTitle());
         board.setContent(boardUpdateDto.getContent());
+        board.setItemPrice(boardUpdateDto.getPrice());
+        board.setItemTime(boardUpdateDto.getTime());
         board.setAddress(boardUpdateDto.getAddress());
         board.setLongitude(boardUpdateDto.getLongitude());
         board.setLatitude(boardUpdateDto.getLatitude());
-        board.setBoardState(BoardState.valueOf(boardUpdateDto.getBoardState()));
         board.setCategory(BoardCategory.valueOf(boardUpdateDto.getCategory()));
         board.setBoardType(BoardType.valueOf(boardUpdateDto.getBoardType()));
         List<MultipartFile> images = boardUpdateDto.getImages();
@@ -200,4 +226,184 @@ public class BoardService {
         boardRepository.deleteById(id);
     }
 
+    @Transactional
+    public void payMeth(PayMethDto paymethdto, Long boardId, Long chatId, Member member) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 글이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        //거래중인 글 or 거래완료글이면 예외처리
+        if(board.getBoardState()==RESERVED || board.getBoardState()==SOLD){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        PayMethod payMethod = PayMethod.valueOf(paymethdto.getPayMeth());
+        //거래방식 저장
+        board.setPayMethod(payMethod);
+        if (payMethod.equals(PAY)) {  //틈새페이를 선택했을때
+                // 틈새페이 지불하는 사람이 board 가격만큼 현재 있는지 확인 없으면 -> 예외터지게 -> 프론트가 예외처리
+                //있으면 차감하는 로직
+            if(board.getBoardType().equals(SELL)){
+                //판매글일때.. 채팅하기 누른사람(buyer)이 돈을 지불
+                if(board.getItemPrice() > chatRoom.getBuyer().getTimePay()) {
+                    throw new IllegalArgumentException("틈새페이를 충전해주세요");
+                }
+                else {
+                    chatRoom.getBuyer().setTimePay(chatRoom.getBuyer().getTimePay() - board.getItemPrice());
+                    //포인트가 임시저장소로 이동
+                    PayStorage storage = PayStorage.builder()
+                            .member(chatRoom.getBuyer())
+                            .amount(board.getItemPrice())
+                            .board(board)
+                            .build();
+                    payStorageRepository.save(storage);
+                }
+            }else {
+                //구매글일때.. 채팅하기 누른사람(buyer)말고 글쓴사람 writer가 돈을 지불
+                if(board.getItemPrice() > board.getMember().getTimePay()) {
+                    throw new IllegalArgumentException("틈새페이를 충전해주세요");
+                }
+                else {
+                    board.getMember().setTimePay(board.getMember().getTimePay() - board.getItemPrice());
+                    //포인트가 임시저장소로 이동
+                    PayStorage storage = PayStorage.builder()
+                            .member(board.getMember())
+                            .amount(board.getItemPrice())
+                            .board(board)
+                            .build();
+                    payStorageRepository.save(storage);
+                }
+            }
+        } else if(payMethod.equals(ACCOUNT)) {
+            Account account = Account.builder()
+                    .accountNumber(paymethdto.getAccountNumber())
+                    .bank(paymethdto.getBank())
+                    .member(member)
+                    .board(board)
+                    .chatRoom(chatRoom)
+                    .holder(paymethdto.getHolder()).build();
+            accountRepository.save(account);
+        }
+        board.setBoardState(RESERVED);
+    }
+
+    @Transactional
+    public void cancel(Long boardId, Long chatId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 글이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        //거래중인 글 아니면 예외처리
+        if(board.getBoardState()==SALE || board.getBoardState()==SOLD){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        //틈새페이는 환불해줘야함
+        if(board.getPayMethod().equals(PAY)) {
+            PayStorage storage = payStorageRepository.findByBoard(board)
+                    .orElseThrow(() -> new IllegalArgumentException("해당하는 저장소가 존재하지 않습니다."));
+
+            if (board.getBoardType().equals(SELL)) {
+                //판매글일때 채팅하기 누른사람(buyer)이 돈을 지불한 사람
+                chatRoom.getBuyer().setTimePay(chatRoom.getBuyer().getTimePay() + storage.getAmount());
+            } else {
+                //구매글일때 채팅하기 누른사람(buyer)말고 글쓴사람 writer가 돈을 지불한 사람
+                board.getMember().setTimePay(board.getMember().getTimePay() + storage.getAmount());
+            }
+            //스토리지 삭제
+            payStorageRepository.delete(storage);
+        }
+        board.setBoardState(SALE);
+    }
+
+//    @Transactional
+//    public void saveAccount(AccountDto accountdto, Long boardId, Long chatId, Long userId) {
+//        Board board = boardRepository.findById(boardId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다."));
+//        Member member = memberRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
+//        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+//        Account account = Account.builder()
+//                .accountNumber(accountdto.getAccountNumber())
+//                .bank(accountdto.getBank())
+//                .member(member)
+//                .board(board)
+//                .chatRoom(chatRoom)
+//                .holder(accountdto.getHolder()).build();
+//        accountRepository.save(account);
+//    }
+
+    @Transactional
+    public void complete(Long boardId, Long chatId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 글이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        //틈새페이는 상대방에게 이동
+        if(board.getPayMethod().equals(PAY)) {
+            PayStorage storage = payStorageRepository.findByBoard(board)
+                    .orElseThrow(() -> new IllegalArgumentException("해당하는 저장소가 존재하지 않습니다."));
+
+            if (board.getBoardType().equals(SELL)) {
+                //판매글일때 채팅하기 누른사람(buyer)이 돈을 지불한 사람
+                board.getMember().setTimePay(board.getMember().getTimePay() + storage.getAmount());
+            } else {
+                //구매글일때 채팅하기 누른사람(buyer)말고 글쓴사람 writer가 돈을 지불한 사람
+                chatRoom.getBuyer().setTimePay(chatRoom.getBuyer().getTimePay() + storage.getAmount());
+            }
+            //스토리지 삭제
+            payStorageRepository.delete(storage);
+        }
+        board.setBoardState(SOLD);
+    }
+
+    public AccountResponseDto getAccount(Long boardId, Long chatId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        Account account = accountRepository.findByChatRoom(chatRoom)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
+        AccountResponseDto accountResponseDto = new AccountResponseDto();
+        accountResponseDto.setAccountNumber(account.getAccountNumber());
+        accountResponseDto.setBank(account.getBank());
+        accountResponseDto.setHolder(account.getHolder());
+        return accountResponseDto;
+    }
+
+    //로그인한사람 (나) seller 인지 buyer인지 알려줌
+    public WhoResponseDto buyWho(Long boardId, Long chatId, Member member) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 글이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        WhoResponseDto whoResponseDto = new WhoResponseDto();
+        if (board.getBoardType().equals(SELL)) {
+            //판매글일때 채팅하기 누른사람(buyer)이 돈을 지불한 사람
+            if(Objects.equals(member.getId(), chatRoom.getBuyer().getId())){
+                whoResponseDto.setRole("buyer");
+            } else{
+                whoResponseDto.setRole("seller");
+            }
+        } else {
+            //구매글일때 채팅하기 누른사람(buyer)말고 글쓴사람 writer가 돈을 지불한 사람
+            if(Objects.equals(member.getId(), board.getMember().getId())) {
+                whoResponseDto.setRole("buyer");
+            } else{
+                whoResponseDto.setRole("seller");
+            }
+        }
+        return whoResponseDto;
+    }
+
+    @Data
+    public class AccountResponseDto{
+        private String holder; // 예금주
+        private String bank; // 은행
+        private Long accountNumber; //계좌번호
+    }
+
+    @Data
+    public class WhoResponseDto {
+        private String role;
+    }
+
+    //글 삭제되면 account 정보 없어지게
 }

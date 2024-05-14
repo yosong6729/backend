@@ -54,6 +54,9 @@ public class ChatRoom {
     }
 
 
+    public String getLastChatWriter(){return getLastChat().getWriter();}
+
+
     @Override
     public String toString() {
         return "ChatRoom{" +

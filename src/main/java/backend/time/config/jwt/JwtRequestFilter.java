@@ -2,7 +2,6 @@ package backend.time.config.jwt;
 
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.auth.PrincipalDetailService;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
