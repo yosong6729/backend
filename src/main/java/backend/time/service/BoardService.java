@@ -48,12 +48,22 @@ public class BoardService {
     final private PayStorageRepository payStorageRepository;
     final private AccountRepository accountRepository;
 
+//    @Transactional
+//    public void point(PointDto pointDto, Member member) {
+//        Member findMember = memberRepository.findById(member.getId())
+//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+////        Point point = createPoint(pointDto.getLongitude(), pointDto.getLatitude());
+////        findMember.setLocation(point);
+//        findMember.setLongitude(pointDto.getLongitude());
+//        findMember.setLatitude(pointDto.getLatitude());
+//        findMember.setAddress(pointDto.getAddress());
+//        entityManager.flush();
+//    }
+
     @Transactional
-    public void point(PointDto pointDto, Member member) {
-        Member findMember = memberRepository.findById(member.getId())
+    public void point(PointDto pointDto) {
+        Member findMember = memberRepository.findByKakaoId(pointDto.getKakaoId())
                 .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-//        Point point = createPoint(pointDto.getLongitude(), pointDto.getLatitude());
-//        findMember.setLocation(point);
         findMember.setLongitude(pointDto.getLongitude());
         findMember.setLatitude(pointDto.getLatitude());
         findMember.setAddress(pointDto.getAddress());

@@ -25,6 +25,8 @@ public class PayCharge {
 
     private Long amount; // 충전 한 금액
 
+    private String impuid; //결제 고유 번호
+
     @CreationTimestamp
     private Timestamp createDate;
 }

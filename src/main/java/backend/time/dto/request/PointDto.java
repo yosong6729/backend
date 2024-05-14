@@ -10,4 +10,5 @@ public class PointDto {
     private Double longitude;
     private Double latitude;
     private String address;
+    private String kakaoId;
 }

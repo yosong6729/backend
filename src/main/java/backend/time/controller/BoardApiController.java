@@ -5,15 +5,20 @@ import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.BoardListResponseDto;
 import backend.time.dto.ResponseDto;
 import backend.time.dto.request.*;
+import backend.time.model.ChatRoom;
 import backend.time.model.Scrap;
 import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
+import backend.time.repository.ChatRepository;
+import backend.time.repository.ChatRoomRepository;
 import backend.time.repository.ScrapRepository;
 import backend.time.service.BoardService;
+import backend.time.service.ChattingService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,16 +31,27 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class BoardApiController {
 
-    final private BoardService boardService;
-    final private BoardRepository boardRepository;
+    private final BoardService boardService;
+    private final BoardRepository boardRepository;
     private final ScrapRepository scrapRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChattingService chattingService;
+
+
+//    //user 위치 넣기
+//    @PostMapping("/api/auth/point")
+//    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+//        boardService.point(pointDto, principalDetail.getMember());
+//        return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
+//    }
 
     //user 위치 넣기
     @PostMapping("/api/auth/point")
-    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-        boardService.point(pointDto, principalDetail.getMember());
+    public ResponseDto<String> addPoint(@RequestBody @Valid PointDto pointDto) throws IOException {
+        boardService.point(pointDto);
         return new ResponseDto<String>(HttpStatus.OK.value(),"위치 설정 성공");
     }
 
@@ -104,6 +120,21 @@ public class BoardApiController {
         }
         else {
             boardDetailResponseDto.setScrapStus("YES");
+        }
+
+        if(Objects.equals(board.getMember().getId(), principalDetail.getMember().getId())) {
+            boardDetailResponseDto.setWho("writer");
+        } else {
+            boardDetailResponseDto.setWho("reader");
+//            Optional<ChatRoom> chatRoom = chatRoomRepository.findByBoard(board);
+//            if(chatRoom.isPresent()){
+//            boardDetailResponseDto.setRoomName(chatRoom.get().getName());
+//                String roomName = chattingService.findChatRoomByBuyer(boardId, member.getId()).getName();
+//                log.info("roomName = {}", roomName);
+//            }
+            String roomName = chattingService.findChatRoomByBuyer(board.getId(), principalDetail.getMember().getId()).getName();
+            log.info("roomName = {}", roomName);
+            boardDetailResponseDto.setRoomName(roomName);
         }
         boardDetailResponseDto.setUserId(board.getMember().getId());
         boardDetailResponseDto.setNickname(board.getMember().getNickname());
@@ -204,6 +235,10 @@ public class BoardApiController {
 
     @Data
     public class BoardDetailResponseDto{
+        //roomName 채팅방 있으면 채팅방이름 넘겨주고 없으면 null
+        private String roomName;
+        //본인이 쓴 글인지 확인
+        private String who; //reader, writer
         //boardId 게시글 식별자
         private Long boardId;
         private String scrapStus;

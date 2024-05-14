@@ -17,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true); // 자격증명 허용
     }
 
+    private final String CORS_HEADER = "*";
 
     @Value("${file.dir}")
     private String uploadDir;
