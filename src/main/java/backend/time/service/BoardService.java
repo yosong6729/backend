@@ -6,7 +6,7 @@ import backend.time.dto.request.BoardDto;
 import backend.time.dto.request.BoardSearchDto;
 import backend.time.dto.request.BoardUpdateDto;
 import backend.time.dto.request.PointDto;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.board.*;
 import backend.time.repository.BoardRepository;
 import backend.time.repository.ImageRepository;
@@ -24,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

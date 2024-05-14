@@ -1,11 +1,10 @@
 package backend.time.model;
 
+import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;

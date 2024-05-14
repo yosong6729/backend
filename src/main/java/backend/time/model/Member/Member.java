@@ -1,11 +1,16 @@
-package backend.time.model;
+package backend.time.model.Member;
 
+import backend.time.model.board.Board;
+import backend.time.model.board.BoardCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -41,4 +46,23 @@ public class Member {
 
     private Double latitude;
     private Double longitude;
+
+    //매너 평가
+
+    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MannerEvaluation> mannerEvaluationList = new ArrayList<>();
+
+    //서비스 평가
+    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceEvaluation> serviceEvaluationList = new ArrayList<>();
+
+
+/*
+    @ElementCollection
+    private Map<MannerEvaluationCategory, Integer> mannerCount = new HashMap<>();
+
+   @ElementCollection
+    private Map<ServiceEvaluationCategory, Integer> serviceCount = new HashMap<>();*/
+
+
 }

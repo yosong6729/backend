@@ -37,7 +37,7 @@ public class KakaoLoginFailureHandler implements AuthenticationFailureHandler {
     @Override
     @Transactional
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)throws IOException, ServletException {
-        System.out.println("로그인 실패, 에러 메세지 : "+exception.fillInStackTrace());
+        System.out.println("login fail, login error message : "+exception.fillInStackTrace());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println(new ObjectMapper().writeValueAsString(
                 new ResponseDto<>(response.getStatus(), "not our member or strange token")));

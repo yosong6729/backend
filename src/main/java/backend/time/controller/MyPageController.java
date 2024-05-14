@@ -3,7 +3,7 @@ package backend.time.controller;
 
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.service.ChattingService;
 import lombok.AllArgsConstructor;
@@ -12,11 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

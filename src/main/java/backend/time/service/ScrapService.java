@@ -1,6 +1,6 @@
 package backend.time.service;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
 import backend.time.model.board.Board;
 import backend.time.repository.BoardRepository;
