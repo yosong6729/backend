@@ -56,13 +56,15 @@ public class Member {
     @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceEvaluation> serviceEvaluationList = new ArrayList<>();
 
+    private Integer mannerEvaluationScore = 0;
 
+    @ElementCollection
+    private Map<ServiceEvaluationCategory, Integer> serviceCount = new HashMap<>();
 /*
     @ElementCollection
     private Map<MannerEvaluationCategory, Integer> mannerCount = new HashMap<>();
 
-   @ElementCollection
-    private Map<ServiceEvaluationCategory, Integer> serviceCount = new HashMap<>();*/
+   */
 
 
 }
