@@ -50,10 +50,11 @@ public class JwtTokenUtil {
     // 유효성 & 탈취 및 위변조 확인
     public boolean validateToken(String token) {
        try {
+           System.out.println("tokne"+ token);
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
         } catch (Exception e){
-            System.out.println("유효하지 않은 토큰입니다."+e.getMessage());
+            System.out.println("not validate token"+e.getMessage());
             return false;
         }
     }
@@ -77,9 +78,9 @@ public class JwtTokenUtil {
 
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         } catch (Exception e){
-            System.out.println("유효하지 않은 토큰입니다."+e.getMessage());
+            System.out.println("not validd."+e.getMessage());
             return null;
         }
     }
