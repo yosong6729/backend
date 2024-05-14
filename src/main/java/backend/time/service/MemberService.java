@@ -34,6 +34,9 @@ public class MemberService {
     private final EntityManager entityManager;
     private final BoardRepository boardRepository;
 
+    private final ServiceStarRepository serviceStarRepository ;
+
+
     private final MannerEvaluationRepository mannerEvaluationRepository;
     private final ServiceEvaluationRepository serviceEvaluationRepository;
     private final ObjectionRepository objectionRepository;
@@ -305,7 +308,6 @@ public class MemberService {
         serviceEvaluation.get().setEvaluationAVG();
 
     }*/
-private final ServiceStarRepository serviceStarRepository ;
     // 서비스 평가 보내기
     public void sendServiceEvaluation(Member receiver, Board board, List<ServiceEvaluationCategory> serviceEvaluationCategoryList) {
         // board가 없을 경우에는?
@@ -522,21 +524,20 @@ private final ServiceStarRepository serviceStarRepository ;
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         List<ServiceEvaluation> serviceEvaluationList = serviceEvaluationRepository.findByMemberAndBoardCategory(member, category);
         List<ServiceEvaluationDto> serviceEvaluationDtoList = new ArrayList<>();
-        for(int i=0; i<serviceEvaluationList.size(); i++){
-            // 확인
-            System.out.println("serviceEvaluationList"+serviceEvaluationList.get(i).getServiceEvaluationCategory());
-            System.out.println("serviceEvaluationList"+serviceEvaluationList.get(i).getServiceEvaluationCount());
-        }
-        /*for(int i=0; i<serviceEvaluationList.size(); i++){
+
+        for(int i=0; i<serviceEvaluationList.size(); i++) {
             ServiceEvaluation serviceEvaluation = serviceEvaluationList.get(i);
             ServiceEvaluationDto serviceEvaluationDto = ServiceEvaluationDto.builder()
                     .serviceEvaluationCategory(serviceEvaluation.getServiceEvaluationCategory())
                     .boardCategory(serviceEvaluation.getBoardCategory())//지워도 되는지 확인
                     .serviceEvaluationCount(serviceEvaluation.getServiceEvaluationCount())
                     .build();
-            serviceEvaluationDtoList.add(serviceEvaluationDto);*/
+            serviceEvaluationDtoList.add(serviceEvaluationDto);
+        }
 
-            return  null;
+        return  ServiceEvaluationResponseDto.builder()
+                .serviceEvaluationList(serviceEvaluationDtoList)
+                .build();
     }
 
     public MemberResponseDto getProfile(Long id){

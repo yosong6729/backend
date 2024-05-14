@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ServiceEvaluationDto {
     @Enumerated(EnumType.STRING)
-    private ServiceEvaluationCategory serviceEvaluationCategory;
+    private BoardCategory boardCategory;
 
     @Enumerated(EnumType.STRING)
-    private BoardCategory boardCategory;
+    private ServiceEvaluationCategory serviceEvaluationCategory;
 
     private Integer serviceEvaluationCount;
 }
