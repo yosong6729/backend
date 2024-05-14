@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 public class ChatController {
@@ -24,6 +26,11 @@ public class ChatController {
         chatDto.setWriter(nickname);
         chattingService.saveChat(chatDto);
 
+
+        int hour = LocalDateTime.now().getHour();
+        int minute = LocalDateTime.now().getMinute();
+        String time = hour + ":" + minute;
+        chatDto.setTime(time);
         return chatDto;
     }
 
