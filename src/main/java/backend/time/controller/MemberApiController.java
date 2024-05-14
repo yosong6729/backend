@@ -6,8 +6,10 @@ import backend.time.config.jwt.JwtTokenUtil;
 import backend.time.dto.*;
 import backend.time.dto.response.EvaluationResponseDto;
 import backend.time.dto.response.MemberResponseDto;
+import backend.time.dto.response.ServiceEvaluationResponseDto;
 import backend.time.model.Member.Member;
 import backend.time.model.Member.Member_Role;
+import backend.time.model.board.BoardCategory;
 import backend.time.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -173,10 +175,42 @@ public class MemberApiController {
         return new ResponseDto<>(HttpStatus.OK.value(), data);
     }
 
-    @GetMapping("/member/{id}/evaluation") // 내 평가 조회 / 남 평가 조회
+    @GetMapping("/member/{id}/evaluation") // 내 평가 조회 / 남 평가 조회 -> 매너 평가 조회 & 각 카테고리별 별 개수
     public Result<Object> getEvaluation(@AuthenticationPrincipal PrincipalDetail principalDetail, @PathVariable("id") Long memberId){
         EvaluationResponseDto evaluationResponseDto = memberService.getEvaluation(memberId);
         return new Result<>(evaluationResponseDto);
+    }
+    @GetMapping("/member/{memberId}/evaluation/{categoryId}")
+    public Result<Object> getEvaluationDetail(@AuthenticationPrincipal PrincipalDetail principalDetail,@PathVariable("memberId")Long memberId, @PathVariable("categoryId") int categoryId){
+        BoardCategory boardCategory;
+        switch (categoryId){
+            case 1 :
+                boardCategory = BoardCategory.TALENT;
+                break;
+            case 2:
+                boardCategory = BoardCategory.EXERCISE;
+                break;
+            case 3:
+                boardCategory = BoardCategory.ERRANDS;
+                break;
+            case 4:
+                boardCategory = BoardCategory.FREE;
+                break;
+            case 5:
+                boardCategory = BoardCategory.TICKETING;
+                break;
+            case 6:
+                boardCategory = BoardCategory.WAITING;
+                break;
+            case 7:
+                boardCategory = BoardCategory.ETC;
+                break;
+            default:
+                boardCategory = null;
+        }
+        ServiceEvaluationResponseDto serviceResponseDto = memberService.getCategoryEvaluation(memberId, boardCategory);
+
+        return new Result<>(serviceResponseDto);
     }
 
     @GetMapping("/member/profile")
