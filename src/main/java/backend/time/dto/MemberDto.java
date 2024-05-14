@@ -1,6 +1,6 @@
 package backend.time.dto;
 
-import backend.time.model.Member_Role;
+import backend.time.model.Member.Member_Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

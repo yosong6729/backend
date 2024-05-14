@@ -1,6 +1,6 @@
 package backend.time.specification;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
 import org.springframework.data.jpa.domain.Specification;
 

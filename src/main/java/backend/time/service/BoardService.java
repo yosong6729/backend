@@ -1,13 +1,11 @@
 package backend.time.service;
 
-
 import backend.time.dto.BoardDistanceDto;
 import backend.time.dto.request.*;
 import backend.time.model.ChatRoom;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.pay.Account;
 import backend.time.model.pay.PayMethod;
-import backend.time.model.board.*;
 import backend.time.model.pay.PayStorage;
 import backend.time.repository.*;
 import backend.time.model.board.Board;

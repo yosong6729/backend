@@ -1,6 +1,6 @@
 package backend.time.model.board;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
 import backend.time.model.pay.PayMethod;
 import backend.time.model.pay.PayStorage;

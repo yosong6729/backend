@@ -2,7 +2,7 @@ package backend.time.service;
 
 import backend.time.dto.PayResponseDto;
 import backend.time.dto.request.PayDto;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.pay.PayCharge;
 import backend.time.repository.MemberRepository;
 import backend.time.repository.PayChargeRepository;

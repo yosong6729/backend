@@ -1,6 +1,6 @@
 package backend.time.config.auth;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

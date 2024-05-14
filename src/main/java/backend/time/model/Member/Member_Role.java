@@ -1,4 +1,4 @@
-package backend.time.model;
+package backend.time.model.Member;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

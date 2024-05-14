@@ -1,6 +1,6 @@
 package backend.time.model.pay;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

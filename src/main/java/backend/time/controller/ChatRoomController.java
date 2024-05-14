@@ -5,7 +5,7 @@ import backend.time.dto.ChatRoomResponseDto;
 import backend.time.dto.RoomEnterDto;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardType;
 import backend.time.service.BoardServiceImpl;

@@ -3,12 +3,11 @@ package backend.time.controller;
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.config.auth.PrincipalDetailService;
 import backend.time.config.jwt.JwtTokenUtil;
-import backend.time.dto.NicknameDto;
-import backend.time.dto.ResponseDto;
-import backend.time.dto.TokenDto;
-import backend.time.dto.UnfinishedMemberDto;
-import backend.time.model.Member;
-import backend.time.model.Member_Role;
+import backend.time.dto.*;
+import backend.time.model.Member.MannerEvaluation;
+import backend.time.model.Member.Member;
+import backend.time.model.Member.Member_Role;
+import backend.time.model.Member.ServiceEvaluation;
 import backend.time.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -22,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -42,11 +42,12 @@ public class MemberApiController {
 
     @GetMapping("/oauth/kakao")
     public ResponseDto ex1(@RequestParam(value = "code") String code){
-        System.out.println("token "+code);
+        System.out.println("code "+code);
         String token = memberService.getReturnAccessToken(code);
 
         Map<String, Object> data = new HashMap<>();
         data.put("token",token);
+        System.out.println("token "+token);
         return new ResponseDto(HttpStatus.OK.value(), data);
     }
 
@@ -164,6 +165,20 @@ public class MemberApiController {
 
     }
 
+    //매너 평가 보내기
+    @PostMapping("/member/{memberId}/board/{boardId}/evaluation") //어떤 board의 누구에게 보내는 평가인지 -> boardId는 카테고리를 알아야 돼서
+    public ResponseDto<Map<String,Object>> sendEvaluation(@AuthenticationPrincipal PrincipalDetail principalDetail, @PathVariable("memberId") Long memberId,@PathVariable("boardId") Long boardId, @Valid @RequestBody EvaluationDto evaluationDto){
+        memberService.sendEvaluation(memberId, boardId, evaluationDto);
+        Map<String,Object> data = new HashMap<>();
+        data.put("sendEvaluation",true);
+        return new ResponseDto<>(HttpStatus.OK.value(), data);
+    }
+
+    @GetMapping("/member/{id}/evaluation") // 내 평가 조회 / 남 평가 조회
+    public Result<Object> getEvaluation(@AuthenticationPrincipal PrincipalDetail principalDetail, @PathVariable("id") Long memberId){
+        EvaluationResponseDto evaluationResponseDto = memberService.getEvaluation(memberId);
+        return new Result<>(evaluationResponseDto);
+    }
 
     @Data
     @AllArgsConstructor

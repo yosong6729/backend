@@ -1,6 +1,6 @@
 package backend.time.repository;
 
-import backend.time.model.Member;
+import backend.time.model.Member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
