@@ -165,7 +165,7 @@ public class MemberApiController {
     }
 
     //매너 평가 보내기
-    @PostMapping("/member/{memberId}/board/{boardId}/evaluation") //어떤 board의 누구에게 보내는 평가인지 -> boardId는 카테고리를 알아야 돼서
+    @PostMapping("/member/{memberId}/board/{boardId}/evaluation") //어떤 board랑 누구에게 보내는 평가인지 -> boardId는 카테고리를 알아야 돼서
     public ResponseDto<Map<String,Object>> sendEvaluation(@AuthenticationPrincipal PrincipalDetail principalDetail, @PathVariable("memberId") Long memberId,@PathVariable("boardId") Long boardId, @Valid @RequestBody EvaluationDto evaluationDto){
         memberService.sendEvaluation(memberId, boardId, evaluationDto);
         Map<String,Object> data = new HashMap<>();
