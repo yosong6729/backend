@@ -52,11 +52,11 @@ public class JwtTokenUtil {
     // 유효성 & 탈취 및 위변조 확인
     public boolean validateToken(String token) {
        try {
-           System.out.println("tokne"+ token);
+//           System.out.println("tokne"+ token);
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
         } catch (Exception e){
-            System.out.println("not validate token"+e.getMessage());
+//            System.out.println("not validate token"+e.getMessage());
             return false;
         }
     }
