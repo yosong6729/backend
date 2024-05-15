@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ReportDto {
-    @Enumerated(EnumType.STRING)
     private ReportCategory reportCategory; // 신고 사유
 
 }
