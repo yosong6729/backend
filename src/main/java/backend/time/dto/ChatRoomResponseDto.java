@@ -11,6 +11,7 @@ public class ChatRoomResponseDto {
 
     Long roomId;
     String roleType;
+    Long userId;
     List<ChatDto> chatlist;
 
 }

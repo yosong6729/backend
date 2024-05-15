@@ -34,6 +34,12 @@ public class ChatMessage {
     @CreationTimestamp
     private Timestamp createDate;
 
+    private Long buyerRead;
+
+    private Long sellerRead;
+
+    private Long messageId;
+
 
     public void addChat(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
