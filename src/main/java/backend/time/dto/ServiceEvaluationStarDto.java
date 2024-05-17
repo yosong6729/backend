@@ -1,6 +1,5 @@
 package backend.time.dto;
 
-import backend.time.model.Member.ServiceEvaluationCategory;
 import backend.time.model.board.BoardCategory;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,12 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ServiceEvaluationDto {
+public class ServiceEvaluationStarDto {
     @Enumerated(EnumType.STRING)
     private BoardCategory boardCategory;
 
-    @Enumerated(EnumType.STRING)
-    private ServiceEvaluationCategory serviceEvaluationCategory;
+    private Integer starCount; //별 개수
 
-    private Integer serviceEvaluationCount;
 }

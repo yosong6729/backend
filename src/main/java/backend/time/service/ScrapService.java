@@ -1,6 +1,7 @@
 package backend.time.service;
 
 import backend.time.dto.request.ScrapDto;
+
 import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
 import backend.time.model.board.Board;

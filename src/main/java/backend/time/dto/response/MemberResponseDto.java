@@ -1,6 +1,5 @@
-package backend.time.dto;
+package backend.time.dto.response;
 
-import backend.time.model.Member.Member_Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberDto {
+public class MemberResponseDto {
     private String nickname;
     private Long mannerTime;
-//    private Member_Role role;
-
 }
-

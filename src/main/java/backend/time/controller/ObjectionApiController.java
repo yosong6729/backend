@@ -2,15 +2,13 @@ package backend.time.controller;
 
 import backend.time.config.auth.PrincipalDetail;
 import backend.time.dto.ObjectionDto;
-import backend.time.dto.ObjectionResponseDto;
+import backend.time.dto.response.ObjectionResponseDto;
 import backend.time.dto.ResponseDto;
-import backend.time.model.Objection.Objection;
 import backend.time.service.ObjectionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

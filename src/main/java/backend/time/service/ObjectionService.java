@@ -1,21 +1,17 @@
 package backend.time.service;
 
 import backend.time.dto.ObjectionDto;
-import backend.time.dto.ObjectionResponseDto;
+import backend.time.dto.response.ObjectionResponseDto;
 import backend.time.model.Member.Member;
 import backend.time.model.Objection.Objection;
 import backend.time.model.Objection.ObjectionImage;
 import backend.time.model.Objection.ObjectionStatus;
-import backend.time.model.board.Image;
 import backend.time.repository.MemberRepository;
 import backend.time.repository.ObjectionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

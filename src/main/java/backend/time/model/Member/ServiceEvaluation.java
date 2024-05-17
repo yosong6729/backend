@@ -22,11 +22,17 @@ public class ServiceEvaluation {
     private ServiceEvaluationCategory serviceEvaluationCategory;
 
     @ManyToOne
-    @JoinColumn(name = "member_id") // 데이터베이스에서 참조하는 컬럼 이름을 지정
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @Enumerated(EnumType.STRING)
     private BoardCategory boardCategory;
 
-    private Integer serviceEvaluationCount;
+    private Integer serviceEvaluationCount; //각 서비스 평가당 받은 개수
+
+/*    private Integer evaluationTotalCount; //각 서비스당 받은 개수
+
+    private Integer serviceEvaluationScore = 0; // 각 서비스 평가의 점수(평균을 구하기 위한)
+
+    private Integer serviceEvaluationAVG = 0; // 평균*/
 }
