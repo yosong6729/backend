@@ -7,6 +7,7 @@ import backend.time.model.ChatRoom;
 import backend.time.model.Member.Member;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChattingService {
     List<ChatRoom> findChatRoomByMember(String email);
@@ -15,4 +16,7 @@ public interface ChattingService {
     List<ChatMessage> findChatList(Long roomId);
     ChatRoom findChatRoomByName(Member member, String roomName, Long productId);
 
+    Optional<ChatRoom> findChatRoomById(Long roomId);
+
+    ChatMessage findChatMessageById(Long chatMessageId);
 }

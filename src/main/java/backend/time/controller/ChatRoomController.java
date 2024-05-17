@@ -61,6 +61,15 @@ public class ChatRoomController {
 
         List<ChatMessage> chatList = chattingService.findChatList(room.getId());
 
+        String otherChatPersonKakaoId = "";
+        //상대방 Id
+        if (room.getBuyer().getKakaoId().equals(userKakaoId)) {
+            otherChatPersonKakaoId = room.getBoard().getMember().getKakaoId();
+        } else {
+            otherChatPersonKakaoId = room.getBuyer().getKakaoId();
+        }
+        Long otherChatPersonId = memberService.findMember(otherChatPersonKakaoId).getId();
+
         List<ChatDto> collect = chatList.stream()
                 .map(m -> {ChatDto cm = new ChatDto();
                     cm.setRoomId(m.getChatRoom().getId());
@@ -73,6 +82,7 @@ public class ChatRoomController {
 
         chatRoomResponseDto.setChatlist(collect);
         chatRoomResponseDto.setRoomId(roomId);
+        chatRoomResponseDto.setUserId(otherChatPersonId);
 
         return chatRoomResponseDto;
     }

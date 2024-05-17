@@ -67,4 +67,14 @@ public class ChattingServiceImpl implements ChattingService {
         }
         return findChatRoom.get(); //만약 이미 생성된방이 있으면 그방을 return
     }
+
+    @Override
+    public Optional<ChatRoom> findChatRoomById(Long roomId) {
+        return chatRoomRepository.findById(roomId);
+    }
+
+    @Override
+    public ChatMessage findChatMessageById(Long chatMessageId) {
+        return chatRepository.findChatMessageById(chatMessageId);
+    }
 }
