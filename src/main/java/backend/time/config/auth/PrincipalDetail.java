@@ -31,7 +31,7 @@ public class PrincipalDetail implements UserDetails {
         // 해결방안 , 보안을 위해 refreshToken이나 accessToken의 유효 기간을 줄이기
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(member.getKakaoId());
-        System.out.println("Encoding된 비밀번호" + encodedPassword);
+//        System.out.println("Encoding된 비밀번호" + encodedPassword);
         return encodedPassword;
     }
 
