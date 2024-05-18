@@ -36,9 +36,10 @@ public class NotificationService {
     private final KeywordNotificationRepository keywordNotificationRepository;
     private final ActivityNotificationRepository activityNotificationRepository;
 //    private static final Long DEFAULT_TIMEOUT = 60L * 1000;
+    private static final double EARTH_RADIUS_KM = 6371.0;
 
 
-    public SseEmitter subscribe(String kakaoId){
+    public SseEmitter subscribe(String kakaoId) {
 
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
         SseEmitter sseEmitter = new SseEmitter(-1L);
@@ -54,9 +55,9 @@ public class NotificationService {
         NotificationController.sseEmitters.put(kakaoId, sseEmitter);
 
         // 4. 연결 종료 처리
-        sseEmitter.onCompletion(() -> NotificationController.sseEmitters.remove(kakaoId));	// sseEmitter 연결이 완료될 경우
-        sseEmitter.onTimeout(() -> NotificationController.sseEmitters.remove(kakaoId));		// sseEmitter 연결에 타임아웃이 발생할 경우
-        sseEmitter.onError((e) -> NotificationController.sseEmitters.remove(kakaoId));		// sseEmitter 연결에 오류가 발생할 경우
+        sseEmitter.onCompletion(() -> NotificationController.sseEmitters.remove(kakaoId));    // sseEmitter 연결이 완료될 경우
+        sseEmitter.onTimeout(() -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 타임아웃이 발생할 경우
+        sseEmitter.onError((e) -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 오류가 발생할 경우
 
         return sseEmitter;
     }
@@ -68,51 +69,122 @@ public class NotificationService {
         //boardId를 파라미터로?
         //member_keyword_list에 있는것들을 하나씩 파라미터로 전달받은 board title에 포함되는지 비교
         //포함되면 member_keyword_list에 있는 member_id에 있는 사람들에게
-
         Board board = boardService.findOne(boardId);
         String title = board.getTitle();
         Timestamp createDate = board.getCreateDate();
         String time = MyPageController.Time.calculateTime(createDate);
-        HashMap<String , String> eventData = new HashMap<>();
+        HashMap<String, String> eventData = new HashMap<>();
         eventData.put("title", title);
         eventData.put("time", time);
-        log.info("title = {}", title);
-        log.info("time = {}", time);
+        //만약 나의 위도와 경도가 null이면 키워드가 포함된 게시글 모두 전달.
+        //만약 나의 위도와 경도가 있다면 나의 위도와 경도가 키워드가 포함된 게시글의 위도와 경도의 10km이내에 있으면 전달하고 db에 저장
 
         List<Keyword> allKeyword = keywordService.findAll();
         List<Long> members_id = new ArrayList<>();
         for (Keyword keyword : allKeyword) {//keyword에 저장된 keyword반복문
             if (title.contains(keyword.getKeyword())) { //keyword가 title에 포함되면
-                members_id.add(keyword.getMember().getId());
-                if (NotificationController.sseEmitters.containsKey(keyword.getMember().getKakaoId())) { //키워드를 가진 멤버에게보냄
-                    SseEmitter sseEmitter = NotificationController.sseEmitters.get(keyword.getMember().getKakaoId());
-                    try {
-                        eventData.put("keyword", keyword.getKeyword());
-                        KeywordNotification entity = KeywordNotification.builder()
-                                .member(keyword.getMember()) //키워드를 받은 member
-                                .title(title)
-                                .keyword(keyword.getKeyword()).build();
-                        keywordNotificationRepository.save(entity);
-                        sseEmitter.send(SseEmitter.event().name("keywordNotification").data(eventData));
-                    } catch (Exception e) {
-                        NotificationController.sseEmitters.remove(keyword.getMember().getKakaoId());
+                if (!board.getMember().getKakaoId().equals(keyword.getMember().getKakaoId())) {//게시글 작성자와 키워드 멤버가 동일하지 않아야 보냄
+                    members_id.add(keyword.getMember().getId());
+                    if (NotificationController.sseEmitters.containsKey(keyword.getMember().getKakaoId())) { //키워드를 가진 멤버에게보냄
+                        SseEmitter sseEmitter = NotificationController.sseEmitters.get(keyword.getMember().getKakaoId());
+                        //keyword의 member의 위도, 경도가 숫자값이 아니라면//isNaN() = 숫자인경우 false
+                        if (keyword.getMember().getLatitude().isNaN() && keyword.getMember().getLongitude().isNaN()) {//위도,경도 null인 경우
+                            try {
+                                eventData.put("keyword", keyword.getKeyword());
+                                KeywordNotification entity = KeywordNotification.builder()
+                                        .member(keyword.getMember()) //키워드를 받은 member
+                                        .title(title)
+                                        .keyword(keyword.getKeyword()).build();
+                                keywordNotificationRepository.save(entity);
+                                sseEmitter.send(SseEmitter.event().name("keywordNotification").data(eventData));
+                            } catch (Exception e) {
+                                NotificationController.sseEmitters.remove(keyword.getMember().getKakaoId());
+                            }
+                            eventData.remove("keyword");
+                        } else {//위도와 경도 있는경우, 알림받는사람 위도와 경도가 키워드가 포함된 게시글의 위도와 경도의 10km이내에 있으면 전달하고 db에 저장
+                            Double baseLat = keyword.getMember().getLatitude(); //기준 위도
+                            Double baseLon = keyword.getMember().getLongitude(); //기준 경도
+
+                            Double checkLat = board.getMember().getLatitude();
+                            Double checkLon = board.getMember().getLongitude();
+
+                            Double distanceKm = 10.0;
+                            boolean isWithinRange = isWithinDistance(baseLat, baseLon, checkLat, checkLon, distanceKm);
+                            if (isWithinRange) {
+                                log.info("10km 이내에 있습니다.");
+                                try {
+                                    eventData.put("keyword", keyword.getKeyword());
+                                    KeywordNotification entity = KeywordNotification.builder()
+                                            .member(keyword.getMember()) //키워드를 받은 member
+                                            .title(title)
+                                            .keyword(keyword.getKeyword()).build();
+                                    keywordNotificationRepository.save(entity);
+                                    sseEmitter.send(SseEmitter.event().name("keywordNotification").data(eventData));
+                                } catch (Exception e) {
+                                    NotificationController.sseEmitters.remove(keyword.getMember().getKakaoId());
+                                }
+                            } else {
+                                log.info("10km 이내에 있지 않습니다.");
+                            }
+                        }
+                    } else {//키워드 멤버가 로그인 안한 상태
+                        if (keyword.getMember().getLatitude().isNaN() && keyword.getMember().getLongitude().isNaN()) {
+                            KeywordNotification entity = KeywordNotification.builder()
+                                    .member(keyword.getMember()) //키워드를 받은 member
+                                    .title(title)
+                                    .keyword(keyword.getKeyword()).build();
+                            keywordNotificationRepository.save(entity);
+                        } else {
+                            Double baseLat = keyword.getMember().getLatitude(); //기준 위도
+                            Double baseLon = keyword.getMember().getLongitude(); //기준 경도
+
+                            Double checkLat = board.getMember().getLatitude();
+                            Double checkLon = board.getMember().getLongitude();
+
+                            Double distanceKm = 10.0;
+                            boolean isWithinRange = isWithinDistance(baseLat, baseLon, checkLat, checkLon, distanceKm);
+                            if (isWithinRange) {
+                                log.info("10km 이내에 있습니다.");
+                                KeywordNotification entity = KeywordNotification.builder()
+                                        .member(keyword.getMember()) //키워드를 받은 member
+                                        .title(title)
+                                        .keyword(keyword.getKeyword()).build();
+                                keywordNotificationRepository.save(entity);
+                            } else {
+                                log.info("10km 이내에 있지 않습니다.");
+                            }
+                        }
                     }
-                    eventData.remove("keyword");
                 } else {
-                    KeywordNotification entity = KeywordNotification.builder()
-                            .member(keyword.getMember()) //키워드를 받은 member
-                            .title(title)
-                            .keyword(keyword.getKeyword()).build();
-                    keywordNotificationRepository.save(entity);
+                    log.info("keyword 멤버와 게시글 작성 member가 동일");
                 }
             }
         }
-
-
         log.info("member_id = {}", members_id);
+    }
 
+    public boolean isWithinDistance(double baseLat, double baseLon, double checkLat, double checkLon, double distanceKm) {
+        double distance = calculateDistance(baseLat, baseLon, checkLat, checkLon);
+        return distance <= distanceKm;
+    }
 
+    // 두 지점 간의 거리를 계산하는 메서드
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double radLat1 = Math.toRadians(lat1);
+        double radLon1 = Math.toRadians(lon1);
+        double radLat2 = Math.toRadians(lat2);
+        double radLon2 = Math.toRadians(lon2);
 
+        double deltaLat = radLat2 - radLat1;
+        double deltaLon = radLon2 - radLon1;
+
+        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                Math.cos(radLat1) * Math.cos(radLat2) *
+                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS_KM * c;
     }
 
 
@@ -136,7 +208,7 @@ public class NotificationService {
         Timestamp createDate = scrap.getCreateDate();
         String time = MyPageController.Time.calculateTime(createDate);
 
-        HashMap<String , String> eventData = new HashMap<>();
+        HashMap<String, String> eventData = new HashMap<>();
         eventData.put("nickname", nickname);
         eventData.put("title", title);
         eventData.put("time", time);
@@ -177,7 +249,7 @@ public class NotificationService {
     }
 
     //거래 완료
-    public void transactionComplete(Long roomId){
+    public void transactionComplete(Long roomId) {
         log.info("transactionComplete");
         //채팅방에 있는 각자에게 보내면됨
         Optional<ChatRoom> chatRoomById = chattingService.findChatRoomById(roomId);
@@ -488,11 +560,6 @@ public class NotificationService {
     public void deleteActivityNotification(Long id) {
         activityNotificationRepository.deleteById(id);
     }
-
-
-
-
-
 
 
     //댓글 알림
