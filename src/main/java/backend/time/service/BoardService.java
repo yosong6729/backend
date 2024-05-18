@@ -80,7 +80,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void write(BoardDto boardDto, Member member) throws IOException {
+    public Long write(BoardDto boardDto, Member member) throws IOException {
         Board board = new Board();
         board.setCategory(BoardCategory.valueOf(boardDto.getCategory()));
         board.setTitle(boardDto.getTitle());
@@ -102,8 +102,8 @@ public class BoardService {
 
         board.setMember(member);
 
-        boardRepository.save(board);
-
+        Board savedBoard = boardRepository.save(board);
+        Long boardId = savedBoard.getId();
         if(boardDto.getImages() !=null) {
             // 이미지 개수 검사
             if (boardDto.getImages().size() > 5) {
@@ -112,6 +112,8 @@ public class BoardService {
 
             imageManager.saveImages(boardDto.getImages(), board);
         }
+
+        return boardId;
 
         // Point 객체 생성
 

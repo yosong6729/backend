@@ -1,5 +1,7 @@
 package backend.time.model.Member;
 
+import backend.time.model.ActivityNotification;
+import backend.time.model.KeywordNotification;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardCategory;
 import jakarta.persistence.*;
@@ -57,8 +59,14 @@ public class Member {
     private List<MannerEvaluation> mannerEvaluationList = new ArrayList<>();
 
     //서비스 평가
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceEvaluation> serviceEvaluationList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityNotification> activityNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KeywordNotification> keywordNotifications = new ArrayList<>();
 
 
 /*
