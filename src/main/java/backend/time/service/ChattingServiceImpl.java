@@ -77,4 +77,20 @@ public class ChattingServiceImpl implements ChattingService {
     public ChatMessage findChatMessageById(Long chatMessageId) {
         return chatRepository.findChatMessageById(chatMessageId);
     }
+
+    @Override //@Transaction??
+    @Transactional
+    public void saveUserTypeReadId(String userType, Long roomId) {
+        Optional<ChatRoom> chatRoom = chatRoomRepository.findById(roomId);
+        try {
+            ChatMessage lastChat = chatRoom.get().getLastChat();
+            if (userType.equals("SELLER")) {
+                lastChat.setSellerRead(lastChat.getMessageId());
+            } else {
+                lastChat.setBuyerRead(lastChat.getMessageId());
+            }
+        } catch (Exception e) {
+            log.info("첫 채팅없음");
+        }
+    }
 }

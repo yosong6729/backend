@@ -3,10 +3,12 @@ package backend.time.controller;
 
 import backend.time.dto.ChatRoomDetailDto;
 import backend.time.model.ChatRoom;
+import backend.time.model.board.BoardType;
 import backend.time.service.ChattingService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("my-page")
+@Slf4j
 public class MyPageController {
 
     private final ChattingService chattingService;
@@ -32,13 +36,64 @@ public class MyPageController {
         // 1. 채팅 목록 조회 SELECT
         List<ChatRoom> chatRoomList = chattingService.findChatRoomByMember(userDetails.getUsername());
 
+        final Long[] totalNoReadChat = {0L};
         List<ChatRoomDetailDto> collect = chatRoomList.stream()
-                .map(m -> {ChatRoomDetailDto dto = new ChatRoomDetailDto();
-                    dto.setRoomId(m.getId());
-                    dto.setRoomName(m.getName());
-                    dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
-                    dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
-                    dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
+                .map(m -> {
+                    ChatRoomDetailDto dto = new ChatRoomDetailDto();
+
+                    if (m.getBoard().getBoardType().equals(BoardType.BUY) //게시물이 BUY고 게시글 작성자가 나라면 BUYER
+                            && m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
+                        dto.setRoomId(m.getId());
+                        dto.setBoardId(m.getBoard().getId());
+                        dto.setRoomName(m.getName());
+                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
+                        dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()); //내가 BUYER면
+                        dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
+                        if ((m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead() >= 0)) {
+//                            totalNoReadChat.set(totalNoReadChat.get() + (m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()));
+                            totalNoReadChat[0] += (m.getLastChat().getMessageId()-m.getLastChat().getBuyerRead());
+                        }
+                    } else if (m.getBoard().getBoardType().equals(BoardType.BUY) //게시물이 BUY이고 게시글 작성자가 내가 아니면 SELLER
+                            && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
+                        dto.setRoomId(m.getId());
+                        dto.setBoardId(m.getBoard().getId());
+                        dto.setRoomName(m.getName());
+                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
+                        dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
+                        dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
+                        if ((m.getLastChat().getMessageId() - m.getLastChat().getSellerRead() >= 0)) {
+//                            totalNoReadChat.set(totalNoReadChat.get() + (m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()));
+                            totalNoReadChat[0] += (m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
+                        }
+                    } else if (m.getBoard().getBoardType().equals(BoardType.SELL) //게시물이 SELL이고 게시글 작성자가 나라면 SELLER
+                            && m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
+                        dto.setRoomId(m.getId());
+                        dto.setBoardId(m.getBoard().getId());
+                        dto.setRoomName(m.getName());
+                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
+                        dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
+                        dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
+                        if ((m.getLastChat().getMessageId() - m.getLastChat().getSellerRead() >= 0)) {
+//                            totalNoReadChat.set(totalNoReadChat.get() + (m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()));
+                            totalNoReadChat[0] += (m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
+                        }
+                    } else if (m.getBoard().getBoardType().equals(BoardType.SELL) //게시물이 SELL이고 게시물 작성자가 내가 아니면 BUYER
+                            && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
+                        dto.setRoomId(m.getId());
+                        dto.setBoardId(m.getBoard().getId());
+                        dto.setRoomName(m.getName());
+                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
+                        dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead());
+                        dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
+                        if ((m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead() >= 0)) {
+//                            totalNoReadChat.set(totalNoReadChat.get() + (m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()));
+                            totalNoReadChat[0] += (m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead());
+                        }
+                    }
 
                     return dto;
                 }).collect(Collectors.toList());
@@ -46,14 +101,14 @@ public class MyPageController {
 
         ChatRoomListDto chatRoomListDto = new ChatRoomListDto();
         chatRoomListDto.setChatRoomDetails(collect);
-
+        chatRoomListDto.setTotalNoReadChat(totalNoReadChat[0]);
         return new Result<>(chatRoomListDto);
     }
 
     @Data
     static class ChatRoomListDto {
+        private Long totalNoReadChat;
         private List<ChatRoomDetailDto> chatRoomDetails;
-
     }
 
 

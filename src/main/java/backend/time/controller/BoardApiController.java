@@ -12,6 +12,7 @@ import backend.time.repository.ChatRoomRepository;
 import backend.time.repository.ScrapRepository;
 import backend.time.service.BoardService;
 import backend.time.service.ChattingService;
+import backend.time.service.NotificationService;
 import jakarta.validation.Valid;
 import jdk.jfr.Category;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,7 @@ public class BoardApiController {
     private final ScrapRepository scrapRepository;
     private final ChattingService chattingService;
     private final ChatRoomRepository chatRoomRepository;
+    private final NotificationService notificationService;
 
     //user 위치 넣기
     @PostMapping("/api/auth/point")
@@ -53,7 +55,8 @@ public class BoardApiController {
     //게시글 작성
     @PostMapping("/api/auth/board")
     public ResponseDto<String> writeBoard(@ModelAttribute @Valid BoardDto boardDto, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
-        boardService.write(boardDto, principalDetail.getMember());
+        Long boardId = boardService.write(boardDto, principalDetail.getMember());
+        notificationService.keywordNotification(boardId);
         return new ResponseDto<String>(HttpStatus.OK.value(),"게시글 작성 완료");
     }
 
@@ -203,6 +206,7 @@ public class BoardApiController {
     @PutMapping("api/board/{boardId}/chat/{chatId}/complete")
     public ResponseDto complete(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId) throws IOException {
         boardService.complete(boardId, chatId);
+        notificationService.transactionComplete(chatId);
         //틈새페이는 다시 환불해주는 로직 작성해야함
         return new ResponseDto<String>(HttpStatus.OK.value(),"판매완료로 변경 됨");
     }
