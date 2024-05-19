@@ -1,5 +1,7 @@
 package backend.time.model.Member;
 
+import backend.time.model.ActivityNotification;
+import backend.time.model.KeywordNotification;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardCategory;
 import jakarta.persistence.*;
@@ -61,6 +63,12 @@ public class Member {
     private List<ServiceEvaluation> serviceEvaluationList = new ArrayList<>();
 
     private Integer mannerEvaluationScore = 0;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityNotification> activityNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KeywordNotification> keywordNotifications = new ArrayList<>();
 
     @ElementCollection
     private Map<ServiceEvaluationCategory, Integer> serviceCount = new HashMap<>();

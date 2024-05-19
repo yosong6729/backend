@@ -5,22 +5,28 @@ import backend.time.dto.ChatRoomResponseDto;
 import backend.time.dto.RoomEnterDto;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
+import backend.time.model.ChatType;
 import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardType;
 import backend.time.service.BoardServiceImpl;
 import backend.time.service.ChattingService;
 import backend.time.service.MemberService;
+import backend.time.service.NotificationService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +38,8 @@ public class ChatRoomController {
     private final ChattingService chattingService;
     private final MemberService memberService;
     private final BoardServiceImpl boardService;
+    private final NotificationService notificationService;
+    private final EntityManager entityManager;
 
     /**
      * 채팅방 페이지 ('채팅하기'를 눌렀을 때)
@@ -45,35 +53,105 @@ public class ChatRoomController {
         log.info("roomName = {}", roomEnterDto.getRoomName());
         log.info("boardId = {}", roomEnterDto.getBoardId());
         ChatRoom room = chattingService.findChatRoomByName(member, roomEnterDto.getRoomName(), roomEnterDto.getBoardId());
-
         Board board = boardService.findOne(roomEnterDto.getBoardId());
+        String nickname = member.getNickname();
         String userKakaoId = userDetails.getUsername();
         ChatRoomResponseDto chatRoomResponseDto = new ChatRoomResponseDto();
 
+        String userType = "";
+        String receiverKakaoId = "";
+        //내가 BUYER인지 SELLER인지 판단
         if (board.getBoardType().equals(BoardType.BUY) && board.getMember().getKakaoId().equals(userKakaoId)) {
-            //조건 만족시 BUYER, 아니면 SELLER
             chatRoomResponseDto.setRoleType("BUYER");
-        }else {
+            log.info("BUYER1");
+            userType = "BUYER";
+            receiverKakaoId = room.getBuyer().getKakaoId();
+        }else if(board.getBoardType().equals(BoardType.BUY)){
             chatRoomResponseDto.setRoleType("SELLER");
+            log.info("SELLER1");
+            userType = "SELLER";
+            receiverKakaoId = board.getMember().getKakaoId();
+        } else if (board.getBoardType().equals(BoardType.SELL) && board.getMember().getKakaoId().equals(userKakaoId)) {
+            chatRoomResponseDto.setRoleType("SELLER");
+            log.info("SELLER2");
+            userType = "SELLER";
+            receiverKakaoId = room.getBuyer().getKakaoId();
+        } else if (board.getBoardType().equals(BoardType.SELL)) {
+            chatRoomResponseDto.setRoleType("BUYER");
+            log.info("BUYER2");
+            userType = "BUYER";
+            receiverKakaoId = board.getMember().getKakaoId();
+        }
+        ChatDto chatDto = new ChatDto();
+
+        try {
+            ChatMessage lastChat = room.getLastChat();
+        } catch (Exception e) {
+            if (userType.equals("BUYER")) {
+                chatDto = ChatDto.builder()
+                        .roomId(room.getId())
+                        .message(nickname + "님이 입장하셨습니다.")
+                        .writer(nickname)
+                        .type(ChatType.JOIN)
+                        .messageId(1L)
+                        .buyerRead(1L)
+                        .sellerRead(0L).build();
+            } else if(userType.equals("SELLER")){
+                chatDto = ChatDto.builder()
+                        .roomId(room.getId())
+                        .message(nickname + "님이 입장하셨습니다.")
+                        .writer(nickname)
+                        .type(ChatType.JOIN)
+                        .messageId(1L)
+                        .buyerRead(0L)
+                        .sellerRead(1L).build();
+            }
+            Long savedChat = chattingService.saveChat(chatDto);
+            notificationService.noReadChatNumberPerChatRoomNotification(userDetails.getUsername(), userType, savedChat, receiverKakaoId);
         }
 
         Long roomId = room.getId();
 
-        List<ChatMessage> chatList = chattingService.findChatList(room.getId());
+        notificationService.whenEnterChatRoomNotificiation(userType, roomId, userKakaoId);
+        List<ChatMessage> chatMessageList = new ArrayList<>();
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessageList.add(chatMessage);
 
-        List<ChatDto> collect = chatList.stream()
-                .map(m -> {ChatDto cm = new ChatDto();
-                    cm.setRoomId(m.getChatRoom().getId());
-                    cm.setMessage(m.getMessage());
-                    cm.setWriter(m.getWriter());
-                    cm.setType(m.getType());
+//        List<ChatMessage> chatList = (chattingService.findChatList(room.getId())
+//                .orElseGet(() -> null));
+
+        List<ChatDto> collect = new ArrayList<>();
+        if (chattingService.findChatList(room.getId()).isEmpty()) {
+            List<ChatMessage> chatList = new ArrayList<>();
+            ChatMessage CM = new ChatMessage();
+            chatList.add(CM);
+        } else {
+            List<ChatMessage> chatList = chattingService.findChatList(room.getId());
+            collect = chatList.stream()
+                    .map(m -> {
+                        ChatDto cm = new ChatDto();
+                        cm.setRoomId(m.getChatRoom().getId());
+                        cm.setMessage(m.getMessage());
+                        cm.setWriter(m.getWriter());
+                        cm.setType(m.getType());
+                        cm.setTime(m.getCreateDate().getHours() + ":" + m.getCreateDate().getMinutes());
 //                    cm.setLocalDateTime(m.getCreateDate().toLocalDateTime());
-                    return cm;
-                }).collect(Collectors.toList());
+                        return cm;
+                    }).collect(Collectors.toList());
+        }
+
+        String otherChatPersonKakaoId = "";
+        //상대방 Id
+        if (room.getBuyer().getKakaoId().equals(userKakaoId)) {
+            otherChatPersonKakaoId = room.getBoard().getMember().getKakaoId();
+        } else {
+            otherChatPersonKakaoId = room.getBuyer().getKakaoId();
+        }
+        Long otherChatPersonId = memberService.findMember(otherChatPersonKakaoId).getId();
 
         chatRoomResponseDto.setChatlist(collect);
         chatRoomResponseDto.setRoomId(roomId);
-
+        chatRoomResponseDto.setUserId(otherChatPersonId);
         return chatRoomResponseDto;
     }
 

@@ -1,10 +1,7 @@
 package backend.time.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -12,6 +9,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
 @Entity
 public class ChatMessage {
@@ -33,6 +31,12 @@ public class ChatMessage {
     @Column(name = "created_date")
     @CreationTimestamp
     private Timestamp createDate;
+
+    private Long buyerRead;
+
+    private Long sellerRead;
+
+    private Long messageId;
 
 
     public void addChat(ChatRoom chatRoom) {

@@ -27,6 +27,7 @@ public class ScrapService {
     private final ScrapRepository scrapRepository;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     //스크랩 & 취소
     @Transactional
     public boolean doScrap(Member member, Long boardId){
@@ -39,6 +40,7 @@ public class ScrapService {
                     .member(member)
                     .build();
             scrapRepository.save(newScrap);
+            notificationService.notifyScrap(member, boardId);
             return true;
         }
         else{
