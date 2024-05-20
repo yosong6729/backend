@@ -56,6 +56,8 @@ public class ChatRoomController {
         Board board = boardService.findOne(roomEnterDto.getBoardId());
         String nickname = member.getNickname();
         String userKakaoId = userDetails.getUsername();
+        Long boardId = board.getId();
+        String roomName = room.getName();
         ChatRoomResponseDto chatRoomResponseDto = new ChatRoomResponseDto();
 
         String userType = "";
@@ -152,6 +154,9 @@ public class ChatRoomController {
         chatRoomResponseDto.setChatlist(collect);
         chatRoomResponseDto.setRoomId(roomId);
         chatRoomResponseDto.setUserId(otherChatPersonId);
+        chatRoomResponseDto.setNickName(nickname);
+        chatRoomResponseDto.setBoardId(boardId);
+        chatRoomResponseDto.setRoomName(roomName);
         return chatRoomResponseDto;
     }
 
