@@ -2,6 +2,7 @@ package backend.time.model.board;
 
 import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
+import backend.time.model.pay.Account;
 import backend.time.model.pay.PayMethod;
 import backend.time.model.pay.PayStorage;
 import jakarta.persistence.*;
@@ -30,6 +31,10 @@ public class Board {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trader_id")
+    private Member trader;
 
     private Long itemPrice; // 해당 금액
 
@@ -61,6 +66,9 @@ public class Board {
     @Column(name = "created_date")
     @CreationTimestamp
     private Timestamp createDate;
+
+    @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Account account; // 글에 대한 계좌 정보
 
     //지도 관련
     private String address;

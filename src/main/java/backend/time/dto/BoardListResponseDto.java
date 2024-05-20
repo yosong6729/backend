@@ -1,6 +1,7 @@
 package backend.time.dto;
 
 import backend.time.model.board.BoardState;
+import backend.time.model.board.BoardType;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -18,4 +19,5 @@ public class BoardListResponseDto {
     private String address;
     private BoardState boardState;
     private String firstImage;
+    private BoardType boardType;
 }

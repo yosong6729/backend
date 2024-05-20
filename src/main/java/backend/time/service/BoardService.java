@@ -354,21 +354,22 @@ public class BoardService {
             }
             //스토리지 삭제
             payStorageRepository.delete(storage);
+            board.setTrader(chatRoom.getBuyer());
         }
         board.setBoardState(SOLD);
     }
 
-    public AccountResponseDto getAccount(Long boardId, Long chatId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
-        Account account = accountRepository.findByChatRoom(chatRoom)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
-        AccountResponseDto accountResponseDto = new AccountResponseDto();
-        accountResponseDto.setAccountNumber(account.getAccountNumber());
-        accountResponseDto.setBank(account.getBank());
-        accountResponseDto.setHolder(account.getHolder());
-        return accountResponseDto;
-    }
+//    public AccountResponseDto getAccount(Long boardId, Long chatId) {
+//        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+//        Account account = accountRepository.findByChatRoom(chatRoom)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
+//        AccountResponseDto accountResponseDto = new AccountResponseDto();
+//        accountResponseDto.setAccountNumber(account.getAccountNumber());
+//        accountResponseDto.setBank(account.getBank());
+//        accountResponseDto.setHolder(account.getHolder());
+//        return accountResponseDto;
+//    }
 
     //로그인한사람 (나) seller 인지 buyer인지 알려줌
     public WhoResponseDto buyWho(Long boardId, Long chatId, Member member) {
@@ -395,8 +396,24 @@ public class BoardService {
         return whoResponseDto;
     }
 
+    //작성한 내역(판매글, 구매글) - userId = memberId
+    public List<Board> writeList(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
+        List<Board> boards = boardRepository.findByMemberOrderByCreateDateDesc(member);
+        return boards;
+    }
+
+    //거래한 내역 - userId = traderId
+    public List<Board> tradeList(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
+        List<Board> boards = boardRepository.findByTraderOrderByCreateDateDesc(member);
+        return boards;
+    }
+
     @Data
-    public class AccountResponseDto{
+    public class AccountResponseDto {
         private String holder; // 예금주
         private String bank; // 은행
         private Long accountNumber; //계좌번호
@@ -407,5 +424,4 @@ public class BoardService {
         private String role;
     }
 
-    //글 삭제되면 account 정보 없어지게
 }
