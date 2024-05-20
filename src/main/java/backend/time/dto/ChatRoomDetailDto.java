@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class ChatRoomDetailDto {
     private Long roomId;
     private Long boardId;
+    private Long otherUserId;
     private String roomName;
     private String name; //구매자 이름
     private String message; //마지막 채팅
