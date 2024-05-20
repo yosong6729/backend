@@ -41,10 +41,12 @@ public class ScrapService {
                     .build();
             scrapRepository.save(newScrap);
             notificationService.notifyScrap(member, boardId);
+            board.setScrapCount(board.getScrapCount()+1);
             return true;
         }
         else{
             scrapRepository.delete(scrap.get());
+            board.setScrapCount(board.getScrapCount()-1);
             return false;
         }
     }
