@@ -550,6 +550,7 @@ public class MemberService {
         return MemberResponseDto.builder()
                 .mannerTime(member.getMannerTime())
                 .nickname(member.getNickname())
+                .id(member.getId())
                 .build();
     }
     public MemberResponseDto getOtherProfile(Long id){
