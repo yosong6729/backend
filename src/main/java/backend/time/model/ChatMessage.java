@@ -3,8 +3,11 @@ package backend.time.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,9 +41,12 @@ public class ChatMessage {
 
     private Long messageId;
 
+    @OneToMany(mappedBy = "chatMessage")
+    private List<ChatImage> chatImages = new ArrayList<>();
 
     public void addChat(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
     }
+
 
 }

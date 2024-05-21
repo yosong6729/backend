@@ -110,7 +110,11 @@ public class BoardService {
                 throw new IllegalArgumentException("최대 5개의 이미지만 업로드할 수 있습니다.");
             }
 
-            imageManager.saveImages(boardDto.getImages(), board);
+            List<Image> images = imageManager.saveImages(boardDto.getImages(), board);
+            
+            for (Image image : images) {
+                board.addImage(image);
+            }
         }
 
         return boardId;

@@ -7,7 +7,10 @@ import backend.time.model.*;
 import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardType;
+import backend.time.model.board.Image;
 import backend.time.repository.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,11 +38,12 @@ public class NotificationService {
     private final ChattingService chattingService;
     private final KeywordNotificationRepository keywordNotificationRepository;
     private final ActivityNotificationRepository activityNotificationRepository;
+    private final ImageRepository imageRepository;
 //    private static final Long DEFAULT_TIMEOUT = 60L * 1000;
     private static final double EARTH_RADIUS_KM = 6371.0;
 
 
-    public SseEmitter subscribe(String kakaoId) {
+    public SseEmitter subscribe(String kakaoId, HttpServletResponse response) {
 
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
         SseEmitter sseEmitter = new SseEmitter(-1L);
@@ -47,6 +51,8 @@ public class NotificationService {
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {
             sseEmitter.send(SseEmitter.event().name("connect").data("connected!"));
+            log.info("kakaoId연결됨 = {}", kakaoId);
+            response.setHeader("X-Accel-Buffering", "no");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,7 +79,7 @@ public class NotificationService {
         String title = board.getTitle();
         Timestamp createDate = board.getCreateDate();
         String time = MyPageController.Time.calculateTime(createDate);
-        HashMap<String, String> eventData = new HashMap<>();
+        HashMap<String, Object> eventData = new HashMap<>();
         eventData.put("title", title);
         eventData.put("time", time);
         //만약 나의 위도와 경도가 null이면 키워드가 포함된 게시글 모두 전달.
@@ -90,10 +96,18 @@ public class NotificationService {
                         //keyword의 member의 위도, 경도가 숫자값이 아니라면//isNaN() = 숫자인경우 false
                         if (keyword.getMember().getLatitude().isNaN() && keyword.getMember().getLongitude().isNaN()) {//위도,경도 null인 경우
                             try {
+//                                List<Image> ImageList = imageRepository.findByBoard(board);
                                 eventData.put("keyword", keyword.getKeyword());
+                                eventData.put("boardId", boardId);
+                                if (board.getImages().size() != 0) {
+                                    eventData.put("image", board.getImages().get(0).getStoredFileName());
+                                    log.info("image = {}", board.getImages().get(0).getStoredFileName());
+                                }
+//                                eventData.put("image", ImageList.get(0).getStoredFileName());
                                 KeywordNotification entity = KeywordNotification.builder()
                                         .member(keyword.getMember()) //키워드를 받은 member
                                         .title(title)
+                                        .board(board)
                                         .keyword(keyword.getKeyword()).build();
                                 keywordNotificationRepository.save(entity);
                                 sseEmitter.send(SseEmitter.event().name("keywordNotification").data(eventData));
@@ -113,10 +127,20 @@ public class NotificationService {
                             if (isWithinRange) {
                                 log.info("10km 이내에 있습니다.");
                                 try {
+                                    log.info("board.getImages().size() = {}", board.getImages().size());
+                                    List<Image> ImageList = imageRepository.findByBoard(board);
                                     eventData.put("keyword", keyword.getKeyword());
+                                    log.info("keyword.getKeyword() = {}", keyword.getKeyword());
+                                    eventData.put("boardId", boardId);
+                                    log.info("boardId = {}", boardId);
+                                    if (board.getImages().size() != 0) {
+                                        eventData.put("image", board.getImages().get(0).getStoredFileName());
+                                        log.info("image = {}", board.getImages().get(0).getStoredFileName());
+                                    }
                                     KeywordNotification entity = KeywordNotification.builder()
                                             .member(keyword.getMember()) //키워드를 받은 member
                                             .title(title)
+                                            .board(board)
                                             .keyword(keyword.getKeyword()).build();
                                     keywordNotificationRepository.save(entity);
                                     sseEmitter.send(SseEmitter.event().name("keywordNotification").data(eventData));
@@ -132,6 +156,7 @@ public class NotificationService {
                             KeywordNotification entity = KeywordNotification.builder()
                                     .member(keyword.getMember()) //키워드를 받은 member
                                     .title(title)
+                                    .board(board)
                                     .keyword(keyword.getKeyword()).build();
                             keywordNotificationRepository.save(entity);
                         } else {
@@ -148,6 +173,7 @@ public class NotificationService {
                                 KeywordNotification entity = KeywordNotification.builder()
                                         .member(keyword.getMember()) //키워드를 받은 member
                                         .title(title)
+                                        .board(board)
                                         .keyword(keyword.getKeyword()).build();
                                 keywordNotificationRepository.save(entity);
                             } else {
@@ -331,7 +357,7 @@ public class NotificationService {
     //매세지를 보낼때 message_id의 값 - buyer_id를 계산(buyer가 안읽은 매세지 수)
     //안읽은 매세지 수 내가 SELLER면 BUYER에게 보내기, 내가 BUYER이면 SELLER에게 보내기
     @Transactional
-    public void noReadChatNumberPerChatRoomNotification(String userKakaoId, String userType, Long chatMessageId, String receiverKakaoId) {
+    public void  noReadChatNumberPerChatRoomNotification(String userKakaoId, String userType, Long chatMessageId, String receiverKakaoId) {
         ChatMessage chatMessage = chattingService.findChatMessageById(chatMessageId);
         log.info("chatMessage.getMessageId() = {}", chatMessage.getMessageId());
         Long roomId = chatMessage.getChatRoom().getId();
@@ -527,11 +553,14 @@ public class NotificationService {
         Member member = memberService.findMember(userKakaoId);
         Long memberId = member.getId();
 
+
         List<KeywordNotification> KNList = keywordNotificationRepository.findAllByMember_Id(memberId);
 
         List<KeywordNotificationListDto> collect = KNList.stream().map(m -> {
             KeywordNotificationListDto KNLD = new KeywordNotificationListDto();
             KNLD.setKeywordId(m.getId());
+            KNLD.setBoardId(m.getBoard().getId());
+            KNLD.setImage(m.getBoard().getImages().get(0).getStoredFileName());
             KNLD.setTitle(m.getTitle());
             KNLD.setKeyword(m.getKeyword());
             KNLD.setTime(MyPageController.Time.calculateTime(m.getCreateDate()));

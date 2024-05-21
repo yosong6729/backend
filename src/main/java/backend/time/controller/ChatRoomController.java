@@ -3,6 +3,7 @@ package backend.time.controller;
 import backend.time.dto.ChatDto;
 import backend.time.dto.ChatRoomResponseDto;
 import backend.time.dto.RoomEnterDto;
+import backend.time.model.ChatImage;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
 import backend.time.model.ChatType;
@@ -84,6 +85,7 @@ public class ChatRoomController {
             userType = "BUYER";
             receiverKakaoId = board.getMember().getKakaoId();
         }
+
         ChatDto chatDto = new ChatDto();
 
         try {
@@ -92,6 +94,7 @@ public class ChatRoomController {
             if (userType.equals("BUYER")) {
                 chatDto = ChatDto.builder()
                         .roomId(room.getId())
+                        .boardId(boardId)
                         .message(nickname + "님이 입장하셨습니다.")
                         .writer(nickname)
                         .type(ChatType.JOIN)
@@ -101,6 +104,7 @@ public class ChatRoomController {
             } else if(userType.equals("SELLER")){
                 chatDto = ChatDto.builder()
                         .roomId(room.getId())
+                        .boardId(boardId)
                         .message(nickname + "님이 입장하셨습니다.")
                         .writer(nickname)
                         .type(ChatType.JOIN)
@@ -108,12 +112,12 @@ public class ChatRoomController {
                         .buyerRead(0L)
                         .sellerRead(1L).build();
             }
+
             Long savedChat = chattingService.saveChat(chatDto);
             notificationService.noReadChatNumberPerChatRoomNotification(userDetails.getUsername(), userType, savedChat, receiverKakaoId);
         }
 
         Long roomId = room.getId();
-
         notificationService.whenEnterChatRoomNotificiation(userType, roomId, userKakaoId);
         List<ChatMessage> chatMessageList = new ArrayList<>();
         ChatMessage chatMessage = new ChatMessage();
@@ -129,6 +133,7 @@ public class ChatRoomController {
             chatList.add(CM);
         } else {
             List<ChatMessage> chatList = chattingService.findChatList(room.getId());
+            log.info("chatList.size() = {}", chatList.size());
             collect = chatList.stream()
                     .map(m -> {
                         ChatDto cm = new ChatDto();
@@ -136,11 +141,29 @@ public class ChatRoomController {
                         cm.setMessage(m.getMessage());
                         cm.setWriter(m.getWriter());
                         cm.setType(m.getType());
+                        if (!(m.getChatImages() == null || m.getChatImages().isEmpty())) {
+                            List<ChatImage> chatImages = m.getChatImages();
+
+                            List<String> collect2 = chatImages.stream().map(c -> {
+                                String images = "";
+                                images += c.getStoredFileName();
+
+                                return images;
+                            }).collect(Collectors.toList());
+                            cm.setImage(collect2);
+//                            for (ChatImage chatImage : chatImages) {
+//                                cm.setImage(chatImage.getStoredFileName());
+//                            }
+                        }
                         cm.setTime(m.getCreateDate().getHours() + ":" + m.getCreateDate().getMinutes());
 //                    cm.setLocalDateTime(m.getCreateDate().toLocalDateTime());
                         return cm;
                     }).collect(Collectors.toList());
+
+
         }
+
+
 
         String otherChatPersonKakaoId = "";
         //상대방 Id
@@ -153,10 +176,11 @@ public class ChatRoomController {
 
         chatRoomResponseDto.setChatlist(collect);
         chatRoomResponseDto.setRoomId(roomId);
-        chatRoomResponseDto.setUserId(otherChatPersonId);
+        chatRoomResponseDto.setOtherUserId(otherChatPersonId);
         chatRoomResponseDto.setNickName(nickname);
         chatRoomResponseDto.setBoardId(boardId);
         chatRoomResponseDto.setRoomName(roomName);
+
         return chatRoomResponseDto;
     }
 

@@ -1,6 +1,7 @@
 package backend.time.model;
 
 import backend.time.model.Member.Member;
+import backend.time.model.board.Board;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,10 @@ public class KeywordNotification {
     private String title;
 
     private String keyword;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private Board board;
 
     @CreationTimestamp
     private Timestamp createDate;
