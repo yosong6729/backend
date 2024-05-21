@@ -8,6 +8,7 @@ import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.model.board.BoardType;
 import backend.time.repository.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,14 +40,15 @@ public class NotificationService {
     private static final double EARTH_RADIUS_KM = 6371.0;
 
 
-    public SseEmitter subscribe(String kakaoId) {
-
+    public SseEmitter subscribe(String kakaoId, HttpServletResponse response) {
+        log.info("Subscribing to kakao id: " + kakaoId);
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
-        SseEmitter sseEmitter = new SseEmitter(-1L);
+        SseEmitter sseEmitter = new SseEmitter(30000L);
 
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {
             sseEmitter.send(SseEmitter.event().name("connect").data("connected!"));
+//            response.setHeader("X-Accel-Buffering", "no");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,6 +61,7 @@ public class NotificationService {
         sseEmitter.onTimeout(() -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 타임아웃이 발생할 경우
         sseEmitter.onError((e) -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 오류가 발생할 경우
 
+        log.info("sseEmitter: " + sseEmitter);
         return sseEmitter;
     }
 
