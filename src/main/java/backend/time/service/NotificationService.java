@@ -9,7 +9,6 @@ import backend.time.model.board.Board;
 import backend.time.model.board.BoardType;
 import backend.time.model.board.Image;
 import backend.time.repository.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +43,9 @@ public class NotificationService {
 
 
     public SseEmitter subscribe(String kakaoId, HttpServletResponse response) {
-
+        log.info("Subscribing to kakao id = {}", kakaoId);
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
-        SseEmitter sseEmitter = new SseEmitter(-1L);
+        SseEmitter sseEmitter = new SseEmitter(3000L);
 
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {
@@ -64,6 +63,7 @@ public class NotificationService {
         sseEmitter.onTimeout(() -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 타임아웃이 발생할 경우
         sseEmitter.onError((e) -> NotificationController.sseEmitters.remove(kakaoId));        // sseEmitter 연결에 오류가 발생할 경우
 
+        log.info("sseEmitter: " + sseEmitter);
         return sseEmitter;
     }
 
@@ -362,7 +362,13 @@ public class NotificationService {
         Long roomId = chatMessage.getChatRoom().getId();
         long noReadChatNumber;
         Long totalNoReadChat = 0L;
-        HashMap<String, Long> eventData = new HashMap<>();
+        String message = chatMessage.getMessage();
+        if (chatMessage.getType().equals(ChatType.IMAGE)) {
+            message = "사진";
+        }
+        String time = MyPageController.Time.calculateTime(chatMessage.getCreateDate());
+        String writer = chatMessage.getWriter();
+        HashMap<String, Object> eventData = new HashMap<>();
         eventData.put("roomId", roomId);
         //내가속한 채팅방 리스트
         List<ChatRoom> chatRoomList = chattingService.findChatRoomByMember(userKakaoId);
@@ -439,6 +445,9 @@ public class NotificationService {
             noReadChatNumber = chatMessage.getMessageId() - chatMessage.getBuyerRead();
             eventData.put("noReadChatNumber", noReadChatNumber);
             eventData.put("totalNoReadChat", totalNoReadChat);
+            eventData.put("message", message);
+            eventData.put("writer", writer);
+            eventData.put("time", time);
             if (NotificationController.sseEmitters.containsKey(receiverKakaoId)) {
                 SseEmitter sseEmitter = NotificationController.sseEmitters.get(receiverKakaoId);
                 try {
@@ -462,6 +471,9 @@ public class NotificationService {
             noReadChatNumber = chatMessage.getMessageId() - chatMessage.getSellerRead();
             eventData.put("noReadChatNumber", noReadChatNumber);
             eventData.put("totalNoReadChat", totalNoReadChat);
+            eventData.put("message", message);
+            eventData.put("writer", writer);
+            eventData.put("time", time);
             if (NotificationController.sseEmitters.containsKey(receiverKakaoId)) {
                 SseEmitter sseEmitter = NotificationController.sseEmitters.get(receiverKakaoId);
                 try {

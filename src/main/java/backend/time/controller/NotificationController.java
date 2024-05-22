@@ -34,8 +34,10 @@ public class NotificationController {
     //프론트 쪽에서 사용자가 '로그인'을 하면, 해당 사용자를 sseEmitters 에 등록
     @GetMapping(value = "/api/notification/subscribe", produces = "text/event-stream")
     public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+        log.info("subscribe");
         String kakaoId = userDetails.getUsername();
         SseEmitter sseEmitter = notificationService.subscribe(kakaoId, response);
+        log.info("returnEmitter = {}" , sseEmitter);
         return sseEmitter;
     }
 

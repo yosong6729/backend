@@ -75,6 +75,7 @@ public class ObjectionService {
                     .title(tmpObjection.getTitle())
                     .content(tmpObjection.getContent())
                     .nickname(tmpObjection.getObjected().getNickname())
+                    .objectionStatus(tmpObjection.getStatus())
 //                    .images()
                     .build();
             List<String> collect = images.stream().map(ObjectionImage::getStoredFileName)

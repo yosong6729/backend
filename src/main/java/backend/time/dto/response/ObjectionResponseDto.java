@@ -1,5 +1,6 @@
 package backend.time.dto.response;
 
+import backend.time.model.Objection.ObjectionStatus;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,7 @@ public class ObjectionResponseDto {
     String nickname; // 이의제기된 사람 id
 
     List<String> images;
+    ObjectionStatus objectionStatus;
+
 
 }
