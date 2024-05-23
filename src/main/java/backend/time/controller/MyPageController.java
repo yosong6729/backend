@@ -49,7 +49,7 @@ public class MyPageController {
                         dto.setBoardId(m.getBoard().getId());
                         dto.setOtherUserId(m.getBuyer().getId());//상대방은 chatroom의 buyer(채팅누름사람)
                         dto.setRoomName(m.getName());
-                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setName(m.getBuyer().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
                         dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead()); //내가 BUYER면
                         dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
@@ -61,9 +61,9 @@ public class MyPageController {
                             && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
-                        dto.setOtherUserId(m.getBoard().getId());//상대방은 게시글 작성자
+                        dto.setOtherUserId(m.getBoard().getMember().getId());//상대방은 게시글 작성자
                         dto.setRoomName(m.getName());
-                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setName(m.getBoard().getMember().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
                         dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
                         dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
@@ -77,7 +77,7 @@ public class MyPageController {
                         dto.setBoardId(m.getBoard().getId());
                         dto.setOtherUserId(m.getBuyer().getId()); //상대방은 채팅방의 buyer(채탱누른사람)
                         dto.setRoomName(m.getName());
-                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setName(m.getBuyer().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
                         dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getSellerRead());
                         dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전
@@ -90,9 +90,9 @@ public class MyPageController {
                         //상대방은 게시글 작성자
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
-                        dto.setOtherUserId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBoard().getMember().getId());
                         dto.setRoomName(m.getName());
-                        dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
+                        dto.setName(m.getBoard().getMember().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
                         dto.setNoReadChat(m.getLastChat().getMessageId() - m.getLastChat().getBuyerRead());
                         dto.setTime(Time.calculateTime(m.getLastChat().getCreateDate())); //마지막 채팅시간 ex)몇분전

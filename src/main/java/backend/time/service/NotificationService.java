@@ -39,18 +39,18 @@ public class NotificationService {
     private final ActivityNotificationRepository activityNotificationRepository;
     private final ImageRepository imageRepository;
 //    private static final Long DEFAULT_TIMEOUT = 60L * 1000;
-    private static final double EARTH_RADIUS_KM = 6371.0;
+    private static final double EARTH_RADIUS_KM = 6371.01;
 
 
     public SseEmitter subscribe(String kakaoId, HttpServletResponse response) {
         log.info("Subscribing to kakao id = {}", kakaoId);
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
-        SseEmitter sseEmitter = new SseEmitter(3000L);
+        SseEmitter sseEmitter = new SseEmitter(-1L);
 
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {
             sseEmitter.send(SseEmitter.event().name("connect").data("connected!"));
-//            response.setHeader("X-Accel-Buffering", "no");
+            response.setHeader("X-Accel-Buffering", "no");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,10 +116,13 @@ public class NotificationService {
                             eventData.remove("keyword");
                         } else {//위도와 경도 있는경우, 알림받는사람 위도와 경도가 키워드가 포함된 게시글의 위도와 경도의 10km이내에 있으면 전달하고 db에 저장
                             Double baseLat = keyword.getMember().getLatitude(); //기준 위도
+                            log.info("member 위도 = {}", keyword.getMember().getLatitude());
                             Double baseLon = keyword.getMember().getLongitude(); //기준 경도
-
+                            log.info("member 경도 = {}", keyword.getMember().getLongitude());
                             Double checkLat = board.getMember().getLatitude();
                             Double checkLon = board.getMember().getLongitude();
+                            log.info("게시글 위도 = {}", board.getMember().getLatitude());
+                            log.info("게시글 경도 = {}", board.getMember().getLongitude());
 
                             Double distanceKm = 10.0;
                             boolean isWithinRange = isWithinDistance(baseLat, baseLon, checkLat, checkLon, distanceKm);
@@ -160,10 +163,14 @@ public class NotificationService {
                             keywordNotificationRepository.save(entity);
                         } else {
                             Double baseLat = keyword.getMember().getLatitude(); //기준 위도
+                            log.info("member 위도 = {}", keyword.getMember().getLatitude());
                             Double baseLon = keyword.getMember().getLongitude(); //기준 경도
-
+                            log.info("member 경도 = {}", keyword.getMember().getLongitude());
                             Double checkLat = board.getMember().getLatitude();
                             Double checkLon = board.getMember().getLongitude();
+                            log.info("게시글 위도 = {}", board.getMember().getLatitude());
+                            log.info("게시글 경도 = {}", board.getMember().getLongitude());
+
 
                             Double distanceKm = 10.0;
                             boolean isWithinRange = isWithinDistance(baseLat, baseLon, checkLat, checkLon, distanceKm);
@@ -190,26 +197,43 @@ public class NotificationService {
 
     public boolean isWithinDistance(double baseLat, double baseLon, double checkLat, double checkLon, double distanceKm) {
         double distance = calculateDistance(baseLat, baseLon, checkLat, checkLon);
+        log.info("distance = {}", distance);
         return distance <= distanceKm;
     }
 
     // 두 지점 간의 거리를 계산하는 메서드
     public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        double radLat1 = Math.toRadians(lat1);
-        double radLon1 = Math.toRadians(lon1);
-        double radLat2 = Math.toRadians(lat2);
-        double radLon2 = Math.toRadians(lon2);
+//        double radLat1 = deg2red(lat1);
+//        double radLon1 = deg2red(lon1);
+//        double radLat2 = deg2red(lat2);
+//        double radLon2 = deg2red(lon2);
 
-        double deltaLat = radLat2 - radLat1;
-        double deltaLon = radLon2 - radLon1;
 
-        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-                Math.cos(radLat1) * Math.cos(radLat2) *
-                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+//        double deltaLat = /*radLat2 - radLat1;*/ deg2red(lat2 - lat1);
+//        double deltaLon = /*radLon2 - radLon1;*/ deg2red(lon2 - lon1);
+//
+//        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+//                Math.cos(deg2red(lat1)) * Math.cos(deg2red(lat2)) *
+//                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+//
+//        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//
+//        return EARTH_RADIUS_KM * c;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
 
+        // Haversine 공식
+        double a = Math.pow(Math.sin(dLat / 2), 2)
+                + Math.pow(Math.sin(dLon / 2), 2)
+                * Math.cos(lat1) * Math.cos(lat2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
         return EARTH_RADIUS_KM * c;
+    }
+
+    public static double deg2red(double deg) {
+        return deg * (Math.PI / 180);
     }
 
 
