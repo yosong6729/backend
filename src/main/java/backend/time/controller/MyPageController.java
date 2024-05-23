@@ -61,7 +61,7 @@ public class MyPageController {
                             && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
-                        dto.setOtherUserId(m.getBoard().getId());//상대방은 게시글 작성자
+                        dto.setOtherUserId(m.getBoard().getMember().getId());//상대방은 게시글 작성자
                         dto.setRoomName(m.getName());
                         dto.setName(m.getBoard().getMember().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
@@ -90,7 +90,7 @@ public class MyPageController {
                         //상대방은 게시글 작성자
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
-                        dto.setOtherUserId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBoard().getMember().getId());
                         dto.setRoomName(m.getName());
                         dto.setName(m.getBoard().getMember().getNickname());   //상대방 닉네임
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅

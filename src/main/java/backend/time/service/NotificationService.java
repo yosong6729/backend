@@ -50,7 +50,7 @@ public class NotificationService {
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {
             sseEmitter.send(SseEmitter.event().name("connect").data("connected!"));
-//            response.setHeader("X-Accel-Buffering", "no");
+            response.setHeader("X-Accel-Buffering", "no");
         } catch (IOException e) {
             e.printStackTrace();
         }
