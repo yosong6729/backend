@@ -1,11 +1,15 @@
 package backend.time.service;
 
+import backend.time.model.ChatImage;
+import backend.time.model.ChatMessage;
 import backend.time.model.Objection.Objection;
 import backend.time.model.Objection.ObjectionImage;
+import backend.time.repository.ChatImageRepository;
 import backend.time.repository.ImageRepository;
 import backend.time.model.board.Board;
 import backend.time.model.board.Image;
 import backend.time.repository.ObjectionImageRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +24,14 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ImageManager {
 
     final private ImageRepository imageRepository;
 
     final private ObjectionImageRepository objectionImageRepository;
+
+    private final ChatImageRepository chatImageRepository;
 
     @Value("${file.dir}")
     private String storePath; //파일 저장할 경로
@@ -107,6 +114,38 @@ public class ImageManager {
         }
         return objectionImageList;
     }
+
+
+    public ChatImage saveChatImage(MultipartFile multipartFile, ChatMessage chatMessage) throws IOException {
+        if(multipartFile.isEmpty()){
+            return null;
+        }
+
+        String uploadFileName = multipartFile.getOriginalFilename();
+        String storedFileName = createStoreFileName(uploadFileName);
+        String ext = extractExt(uploadFileName);
+
+        multipartFile.transferTo(new File(getImagePath(storedFileName,ext)));
+
+        ChatImage chatImage = ChatImage.builder()
+                .uploadFileName(uploadFileName)
+                .storedFileName(storedFileName)
+                .chatMessage(chatMessage)
+                .build();
+        return chatImageRepository.save(chatImage);
+    }
+
+    @Transactional
+    public List<ChatImage> saveChatImages(List<MultipartFile> multipartFiles, ChatMessage chatMessage) throws IOException {
+        List<ChatImage> chatMessageList = new ArrayList<>();
+        for(MultipartFile multipartFile : multipartFiles) {
+            if (!multipartFile.isEmpty()) {
+                chatMessageList.add(saveChatImage(multipartFile, chatMessage));
+            }
+        }
+        return chatMessageList;
+    }
+
 
 
 

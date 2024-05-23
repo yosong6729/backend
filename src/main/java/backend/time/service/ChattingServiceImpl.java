@@ -3,6 +3,7 @@ package backend.time.service;
 import backend.time.dto.ChatDto;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
+import backend.time.model.ChatType;
 import backend.time.model.Member.Member;
 import backend.time.model.board.Board;
 import backend.time.repository.BoardRepository;
@@ -40,7 +41,15 @@ public class ChattingServiceImpl implements ChattingService {
     @Override
     @Transactional
     public Long saveChat(ChatDto chatDto) {
+        log.info("1");
+        if (chatDto.getType().equals(ChatType.JOIN)) {
+            Board board = boardRepository.findById(chatDto.getBoardId())
+                    .orElseThrow(() -> new IllegalArgumentException("해당글이 존재하지 않습니다."));
+
+            board.setChatCount(board.getChatCount()+ 1);
+        }
         ChatRoom chatRoom = chatRoomRepository.findById(chatDto.getRoomId()).get(); //chatDto의 room_id로 repository에 저장되어있는 chatRoom가져오기
+        log.info("2");
         ChatMessage chat = chatDto.toEntity(chatRoom); //chatDto에 정보를 가지고 리포지토리에서 찾은 chatRoom을 같이 엔티티로 전환하여 chat반환
         log.info("chat.getType = {}", chat.getType().toString());
         chatRepository.save(chat); //DB에 chat저장(spring data jpa)

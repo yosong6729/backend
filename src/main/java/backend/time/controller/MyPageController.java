@@ -36,6 +36,8 @@ public class MyPageController {
         // 1. 채팅 목록 조회 SELECT
         List<ChatRoom> chatRoomList = chattingService.findChatRoomByMember(userDetails.getUsername());
 
+
+
         final Long[] totalNoReadChat = {0L};
         List<ChatRoomDetailDto> collect = chatRoomList.stream()
                 .map(m -> {
@@ -45,6 +47,7 @@ public class MyPageController {
                             && m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBuyer().getId());//상대방은 chatroom의 buyer(채팅누름사람)
                         dto.setRoomName(m.getName());
                         dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
@@ -58,6 +61,7 @@ public class MyPageController {
                             && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBoard().getId());//상대방은 게시글 작성자
                         dto.setRoomName(m.getName());
                         dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
@@ -71,6 +75,7 @@ public class MyPageController {
                             && m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBuyer().getId()); //상대방은 채팅방의 buyer(채탱누른사람)
                         dto.setRoomName(m.getName());
                         dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
@@ -82,8 +87,10 @@ public class MyPageController {
                         }
                     } else if (m.getBoard().getBoardType().equals(BoardType.SELL) //게시물이 SELL이고 게시물 작성자가 내가 아니면 BUYER
                             && !m.getBoard().getMember().getKakaoId().equals(userDetails.getUsername())) {
+                        //상대방은 게시글 작성자
                         dto.setRoomId(m.getId());
                         dto.setBoardId(m.getBoard().getId());
+                        dto.setOtherUserId(m.getBoard().getId());
                         dto.setRoomName(m.getName());
                         dto.setName(m.getLastChatWriter());   //마지막 채팅 작성자 이름
                         dto.setMessage(m.getLastChat().getMessage());  //마지막 채팅
