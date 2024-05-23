@@ -116,13 +116,9 @@ public class NotificationService {
                             eventData.remove("keyword");
                         } else {//위도와 경도 있는경우, 알림받는사람 위도와 경도가 키워드가 포함된 게시글의 위도와 경도의 10km이내에 있으면 전달하고 db에 저장
                             Double baseLat = keyword.getMember().getLatitude(); //기준 위도
-                            log.info("member 위도 = {}", keyword.getMember().getLatitude());
                             Double baseLon = keyword.getMember().getLongitude(); //기준 경도
-                            log.info("member 경도 = {}", keyword.getMember().getLongitude());
-                            Double checkLat = board.getMember().getLatitude();
-                            Double checkLon = board.getMember().getLongitude();
-                            log.info("게시글 위도 = {}", board.getMember().getLatitude());
-                            log.info("게시글 경도 = {}", board.getMember().getLongitude());
+                            Double checkLat = board.getLatitude();
+                            Double checkLon = board.getLongitude();
 
                             Double distanceKm = 10.0;
                             boolean isWithinRange = isWithinDistance(baseLat, baseLon, checkLat, checkLon, distanceKm);
@@ -163,13 +159,9 @@ public class NotificationService {
                             keywordNotificationRepository.save(entity);
                         } else {
                             Double baseLat = keyword.getMember().getLatitude(); //기준 위도
-                            log.info("member 위도 = {}", keyword.getMember().getLatitude());
                             Double baseLon = keyword.getMember().getLongitude(); //기준 경도
-                            log.info("member 경도 = {}", keyword.getMember().getLongitude());
-                            Double checkLat = board.getMember().getLatitude();
-                            Double checkLon = board.getMember().getLongitude();
-                            log.info("게시글 위도 = {}", board.getMember().getLatitude());
-                            log.info("게시글 경도 = {}", board.getMember().getLongitude());
+                            Double checkLat = board.getLatitude();
+                            Double checkLon = board.getLongitude();
 
 
                             Double distanceKm = 10.0;
