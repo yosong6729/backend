@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +43,7 @@ public class ChatRoomController {
      * 채팅방 페이지 ('채팅하기'를 눌렀을 때)
      * 상품 상세페이지에서 넘겨받은 roomName값으로 채팅방을 찾고, 없으면 해당 roomName을 가지는 ChatRoom 객체를 생성하여 DB에 저장
      */
-    @GetMapping("/room")
+    @PostMapping("/room")
     public ChatRoomResponseDto enterPage(@AuthenticationPrincipal UserDetails userDetails, @RequestBody RoomEnterDto roomEnterDto){
         Member member = memberService.findMember(userDetails.getUsername()); //Member kakaoId로 member가져오기
         log.info("userKakaoId = {}", userDetails.getUsername());
