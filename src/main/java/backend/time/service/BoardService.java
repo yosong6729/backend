@@ -358,8 +358,8 @@ public class BoardService {
             }
             //스토리지 삭제
             payStorageRepository.delete(storage);
-            board.setTrader(chatRoom.getBuyer());
         }
+        board.setTrader(chatRoom.getBuyer());
         board.setBoardState(SOLD);
     }
 

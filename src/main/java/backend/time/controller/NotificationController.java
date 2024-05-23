@@ -37,7 +37,7 @@ public class NotificationController {
         log.info("subscribe");
         String kakaoId = userDetails.getUsername();
         SseEmitter sseEmitter = notificationService.subscribe(kakaoId, response);
-        log.info("returnEmitter : " , sseEmitter);
+        log.info("returnEmitter = {}" , sseEmitter);
         return sseEmitter;
     }
 
