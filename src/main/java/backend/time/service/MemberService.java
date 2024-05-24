@@ -430,17 +430,17 @@ public class MemberService {
                 ||mannerEvaluationCategory.equals(MannerEvaluationCategory.KIND)||mannerEvaluationCategory.equals(MannerEvaluationCategory.CHATFAST)){
             result = tmpCount+1;
             member.setMannerEvaluationScore(result);
-            if(result == 10){
+            if(result >= 10){
                 member.setMannerTime(member.getMannerTime()+5);
-                member.setMannerEvaluationScore(0);
+                member.setMannerEvaluationScore(member.getMannerEvaluationScore()-10);
             }
         }
         else{
              result = tmpCount-1;
             member.setMannerEvaluationScore(result);
-            if(result == -10){
+            if(result <= -10){
                 member.setMannerTime(member.getMannerTime()-5);
-                member.setMannerEvaluationScore(0);
+                member.setMannerEvaluationScore(member.getMannerEvaluationScore()+10);
             }
         }
 
