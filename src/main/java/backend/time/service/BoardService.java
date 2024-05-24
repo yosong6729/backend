@@ -136,6 +136,11 @@ public class BoardService {
             boardIds = boardDistanceDtos.stream()
                     .map(BoardDistanceDto::getId)
                     .collect(Collectors.toList());
+        System.out.println("boardId : "+ boardIds);
+        List<Double> distance = boardDistanceDtos.stream()
+                .map(BoardDistanceDto::getDistance)
+                .collect(Collectors.toList());
+        System.out.println("distance : "+ distance);
 
 //        Specification<Board> spec = Specification.where(null);
 
@@ -143,40 +148,18 @@ public class BoardService {
 //            List<Long> finalBoardIds = boardIds;
 //            spec = spec.and((root, query, cb) -> root.get("id").in(finalBoardIds));
 //        }
-        System.out.println(boardIds);
 
         Specification<Board> spec = Specification.where(BoardSpecification.withIds(boardIds))
                 .and(BoardSpecification.withTitleOrContent(requestDto.getKeyword()))
                 .and(BoardSpecification.withCategory(requestDto.getCategory()))
                 .and(BoardSpecification.withType(requestDto.getBoardType()));
 
-//        // 위치 기반 검색 결과로 필터링
-//        if (!boardIds.isEmpty()) {
-//            System.out.println("필터링");
-//            spec = spec.and(BoardSpecification.withIds(boardIds));
-//        }
-//
-//        // 제목이나 내용으로 검색
-//        if (requestDto.getKeyword() != null && !requestDto.getKeyword().isEmpty()) {
-//            System.out.println("제목이나 내용으로 검색");
-//            spec = spec.and(BoardSpecification.withTitleOrContent(requestDto.getKeyword()));
-//        }
-//
-//        // 카테고리로 검색
-//        if (requestDto.getCategory() != null && !requestDto.getCategory().isEmpty()) {
-//            spec = spec.and(BoardSpecification.withCategory(requestDto.getCategory()));
-//        }
-//
-//        // 타입으로 검색
-//        if (requestDto.getBoardType() != null && !requestDto.getBoardType().isEmpty()) {
-//            spec = spec.and(BoardSpecification.withType(requestDto.getBoardType()));
-//        }
-
         String property = "createDate";
 
         Pageable pageable = PageRequest.of(requestDto.getPageNum(), 8, Sort.by(Sort.Direction.DESC, property));
 
 
+        System.out.println(spec);
         return boardRepository.findAll(spec, pageable);
     }
 

@@ -45,7 +45,7 @@ public class NotificationService {
     public SseEmitter subscribe(String kakaoId, HttpServletResponse response) {
         log.info("Subscribing to kakao id = {}", kakaoId);
         // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
-        SseEmitter sseEmitter = new SseEmitter(-1L);
+        SseEmitter sseEmitter = new SseEmitter(30000L);
 
         //만료 시간까지 아무런 데이터를 보내지 않을 경우 발생하는 503에러를 방지하기위해, 더미 데이터 전송
         try {

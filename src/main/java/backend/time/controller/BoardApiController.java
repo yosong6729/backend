@@ -64,7 +64,6 @@ public class BoardApiController {
     @GetMapping("/api/board")
     public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto, @AuthenticationPrincipal PrincipalDetail principalDetail) {
         Page<Board> boards = boardService.searchBoards(requestDto, principalDetail.getMember());
-
         // BoardDistanceDto 리스트를 생성
         List<BoardDistanceDto> boardDistanceDtos = boardRepository.findNearbyOrUnspecifiedLocationBoardsWithDistance(principalDetail.getMember().getLongitude(), principalDetail.getMember().getLatitude());
         // id를 key로 distance를 값으로 매핑
