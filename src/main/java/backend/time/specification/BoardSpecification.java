@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
-public class BoardSpecification {
+public class    BoardSpecification {
 
 //    // 위치 기반 검색 결과로 필터링
 //    public static Specification<Board> withIds(List<Long> ids) {
