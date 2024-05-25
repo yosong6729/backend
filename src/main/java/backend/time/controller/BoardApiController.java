@@ -64,7 +64,6 @@ public class BoardApiController {
     @GetMapping("/api/board")
     public Result findAll(@ModelAttribute @Valid BoardSearchDto requestDto, @AuthenticationPrincipal PrincipalDetail principalDetail) {
         Page<Board> boards = boardService.searchBoards(requestDto, principalDetail.getMember());
-
         // BoardDistanceDto 리스트를 생성
         List<BoardDistanceDto> boardDistanceDtos = boardRepository.findNearbyOrUnspecifiedLocationBoardsWithDistance(principalDetail.getMember().getLongitude(), principalDetail.getMember().getLatitude());
         // id를 key로 distance를 값으로 매핑
@@ -217,6 +216,78 @@ public class BoardApiController {
 //        boardService.saveAccount(accountdto, boardId, chatId, principalDetail.getMember().getId());
 //            return new ResponseDto(HttpStatus.OK.value(), "계좌 저장 완료");
 //    }
+
+    //로그인한사람이 seller/buyer 인지 식별
+    @GetMapping("/api/board/{boardId}/chat/{chatId}/who")
+    public Result who(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
+        BoardService.WhoResponseDto whoResponseDto = boardService.buyWho(boardId, chatId, principalDetail.getMember());
+        return new Result<>(whoResponseDto);
+    }
+
+    //<------------------거래한 글, 구매한 글-------------------->
+    //작성한 내역(판매글, 구매글)
+    @GetMapping("users/{userId}/boards/write")
+    public Result writeList(@PathVariable("userId") Long userId){
+
+        List<Board> boards = boardService.writeList(userId);
+
+        // 결과 DTO 리스트를 생성
+        List<BoardListResponseDto> collect = boards.stream().map(board -> {
+            BoardListResponseDto dto = new BoardListResponseDto();
+            dto.setBoardId(board.getId());
+            dto.setTitle(board.getTitle());
+            dto.setItemTime(board.getItemTime());
+            dto.setItemPrice(board.getItemPrice());
+            dto.setCreatedDate(board.getCreateDate());
+            dto.setChatCount(board.getChatCount());
+            dto.setScrapCount(board.getScrapCount());
+            dto.setBoardState(board.getBoardState());
+            dto.setBoardType(board.getBoardType());
+            if(board.getAddress() !=null) {
+                dto.setAddress(board.getAddress());
+            }
+            //이미지가 있으면 첫번째 사진의 storedFileName 넘겨줌 없으면 null
+            if (!board.getImages().isEmpty()) {
+                dto.setFirstImage(board.getImages().get(0).getStoredFileName());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new Result(collect);
+    }
+
+    //거래한 내역
+    @GetMapping("users/{userId}/boards/trade")
+    public Result tradeList(@PathVariable("userId") Long userId){
+
+        List<Board> boards = boardService.tradeList(userId);
+
+        // 결과 DTO 리스트를 생성
+        List<BoardListResponseDto> collect = boards.stream().map(board -> {
+            BoardListResponseDto dto = new BoardListResponseDto();
+            dto.setBoardId(board.getId());
+            dto.setTitle(board.getTitle());
+            dto.setItemTime(board.getItemTime());
+            dto.setItemPrice(board.getItemPrice());
+            dto.setCreatedDate(board.getCreateDate());
+            dto.setChatCount(board.getChatCount());
+            dto.setScrapCount(board.getScrapCount());
+            dto.setBoardState(board.getBoardState());
+            dto.setBoardType(board.getBoardType());
+            if(board.getAddress() !=null) {
+                dto.setAddress(board.getAddress());
+            }
+            //이미지가 있으면 첫번째 사진의 storedFileName 넘겨줌 없으면 null
+            if (!board.getImages().isEmpty()) {
+                dto.setFirstImage(board.getImages().get(0).getStoredFileName());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new Result(collect);
+    }
 
     @Data
     public class BoardDetailResponseDto{

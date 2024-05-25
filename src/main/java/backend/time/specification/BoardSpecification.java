@@ -39,10 +39,9 @@ public class    BoardSpecification {
 
     // 위치 기반 검색 결과로 필터링
     public static Specification<Board> withIds(List<Long> ids) {
-        System.out.println(ids);
         return (root, query, cb) -> {
             if (ids == null || ids.isEmpty()) {
-                return null;
+                return cb.disjunction();
             }
             return root.get("id").in(ids);
         };

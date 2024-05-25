@@ -3,6 +3,7 @@ package backend.time.controller;
 import backend.time.dto.ChatDto;
 import backend.time.dto.ChatRoomResponseDto;
 import backend.time.dto.RoomEnterDto;
+import backend.time.model.ChatImage;
 import backend.time.model.ChatMessage;
 import backend.time.model.ChatRoom;
 import backend.time.model.ChatType;
@@ -19,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +43,7 @@ public class ChatRoomController {
      * 채팅방 페이지 ('채팅하기'를 눌렀을 때)
      * 상품 상세페이지에서 넘겨받은 roomName값으로 채팅방을 찾고, 없으면 해당 roomName을 가지는 ChatRoom 객체를 생성하여 DB에 저장
      */
-    @GetMapping("/room")
+    @PostMapping("/room")
     public ChatRoomResponseDto enterPage(@AuthenticationPrincipal UserDetails userDetails, @RequestBody RoomEnterDto roomEnterDto){
         Member member = memberService.findMember(userDetails.getUsername()); //Member kakaoId로 member가져오기
         log.info("userKakaoId = {}", userDetails.getUsername());
@@ -56,6 +54,8 @@ public class ChatRoomController {
         Board board = boardService.findOne(roomEnterDto.getBoardId());
         String nickname = member.getNickname();
         String userKakaoId = userDetails.getUsername();
+        Long boardId = board.getId();
+        String roomName = room.getName();
         ChatRoomResponseDto chatRoomResponseDto = new ChatRoomResponseDto();
 
         String userType = "";
@@ -82,6 +82,7 @@ public class ChatRoomController {
             userType = "BUYER";
             receiverKakaoId = board.getMember().getKakaoId();
         }
+
         ChatDto chatDto = new ChatDto();
 
         try {
@@ -90,6 +91,7 @@ public class ChatRoomController {
             if (userType.equals("BUYER")) {
                 chatDto = ChatDto.builder()
                         .roomId(room.getId())
+                        .boardId(boardId)
                         .message(nickname + "님이 입장하셨습니다.")
                         .writer(nickname)
                         .type(ChatType.JOIN)
@@ -99,6 +101,7 @@ public class ChatRoomController {
             } else if(userType.equals("SELLER")){
                 chatDto = ChatDto.builder()
                         .roomId(room.getId())
+                        .boardId(boardId)
                         .message(nickname + "님이 입장하셨습니다.")
                         .writer(nickname)
                         .type(ChatType.JOIN)
@@ -106,12 +109,12 @@ public class ChatRoomController {
                         .buyerRead(0L)
                         .sellerRead(1L).build();
             }
+
             Long savedChat = chattingService.saveChat(chatDto);
             notificationService.noReadChatNumberPerChatRoomNotification(userDetails.getUsername(), userType, savedChat, receiverKakaoId);
         }
 
         Long roomId = room.getId();
-
         notificationService.whenEnterChatRoomNotificiation(userType, roomId, userKakaoId);
         List<ChatMessage> chatMessageList = new ArrayList<>();
         ChatMessage chatMessage = new ChatMessage();
@@ -127,6 +130,7 @@ public class ChatRoomController {
             chatList.add(CM);
         } else {
             List<ChatMessage> chatList = chattingService.findChatList(room.getId());
+            log.info("chatList.size() = {}", chatList.size());
             collect = chatList.stream()
                     .map(m -> {
                         ChatDto cm = new ChatDto();
@@ -134,11 +138,29 @@ public class ChatRoomController {
                         cm.setMessage(m.getMessage());
                         cm.setWriter(m.getWriter());
                         cm.setType(m.getType());
+                        if (!(m.getChatImages() == null || m.getChatImages().isEmpty())) {
+                            List<ChatImage> chatImages = m.getChatImages();
+
+                            List<String> collect2 = chatImages.stream().map(c -> {
+                                String images = "";
+                                images += c.getStoredFileName();
+
+                                return images;
+                            }).collect(Collectors.toList());
+                            cm.setImage(collect2);
+//                            for (ChatImage chatImage : chatImages) {
+//                                cm.setImage(chatImage.getStoredFileName());
+//                            }
+                        }
                         cm.setTime(m.getCreateDate().getHours() + ":" + m.getCreateDate().getMinutes());
 //                    cm.setLocalDateTime(m.getCreateDate().toLocalDateTime());
                         return cm;
                     }).collect(Collectors.toList());
+
+
         }
+
+
 
         String otherChatPersonKakaoId = "";
         //상대방 Id
@@ -151,7 +173,11 @@ public class ChatRoomController {
 
         chatRoomResponseDto.setChatlist(collect);
         chatRoomResponseDto.setRoomId(roomId);
-        chatRoomResponseDto.setUserId(otherChatPersonId);
+        chatRoomResponseDto.setOtherUserId(otherChatPersonId);
+        chatRoomResponseDto.setNickName(nickname);
+        chatRoomResponseDto.setBoardId(boardId);
+        chatRoomResponseDto.setRoomName(roomName);
+
         return chatRoomResponseDto;
     }
 

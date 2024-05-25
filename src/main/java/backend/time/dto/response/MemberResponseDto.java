@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class MemberResponseDto {
     private String nickname;
     private Long mannerTime;
+    private Long timePay;
     private Long id;
 }

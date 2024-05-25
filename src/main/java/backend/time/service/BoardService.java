@@ -110,7 +110,11 @@ public class BoardService {
                 throw new IllegalArgumentException("최대 5개의 이미지만 업로드할 수 있습니다.");
             }
 
-            imageManager.saveImages(boardDto.getImages(), board);
+            List<Image> images = imageManager.saveImages(boardDto.getImages(), board);
+            
+            for (Image image : images) {
+                board.addImage(image);
+            }
         }
 
         return boardId;
@@ -132,6 +136,11 @@ public class BoardService {
             boardIds = boardDistanceDtos.stream()
                     .map(BoardDistanceDto::getId)
                     .collect(Collectors.toList());
+        System.out.println("boardId : "+ boardIds);
+        List<Double> distance = boardDistanceDtos.stream()
+                .map(BoardDistanceDto::getDistance)
+                .collect(Collectors.toList());
+        System.out.println("distance : "+ distance);
 
 //        Specification<Board> spec = Specification.where(null);
 
@@ -139,40 +148,18 @@ public class BoardService {
 //            List<Long> finalBoardIds = boardIds;
 //            spec = spec.and((root, query, cb) -> root.get("id").in(finalBoardIds));
 //        }
-        System.out.println(boardIds);
 
         Specification<Board> spec = Specification.where(BoardSpecification.withIds(boardIds))
                 .and(BoardSpecification.withTitleOrContent(requestDto.getKeyword()))
                 .and(BoardSpecification.withCategory(requestDto.getCategory()))
                 .and(BoardSpecification.withType(requestDto.getBoardType()));
 
-//        // 위치 기반 검색 결과로 필터링
-//        if (!boardIds.isEmpty()) {
-//            System.out.println("필터링");
-//            spec = spec.and(BoardSpecification.withIds(boardIds));
-//        }
-//
-//        // 제목이나 내용으로 검색
-//        if (requestDto.getKeyword() != null && !requestDto.getKeyword().isEmpty()) {
-//            System.out.println("제목이나 내용으로 검색");
-//            spec = spec.and(BoardSpecification.withTitleOrContent(requestDto.getKeyword()));
-//        }
-//
-//        // 카테고리로 검색
-//        if (requestDto.getCategory() != null && !requestDto.getCategory().isEmpty()) {
-//            spec = spec.and(BoardSpecification.withCategory(requestDto.getCategory()));
-//        }
-//
-//        // 타입으로 검색
-//        if (requestDto.getBoardType() != null && !requestDto.getBoardType().isEmpty()) {
-//            spec = spec.and(BoardSpecification.withType(requestDto.getBoardType()));
-//        }
-
         String property = "createDate";
 
         Pageable pageable = PageRequest.of(requestDto.getPageNum(), 8, Sort.by(Sort.Direction.DESC, property));
 
 
+        System.out.println(spec);
         return boardRepository.findAll(spec, pageable);
     }
 
@@ -355,20 +342,21 @@ public class BoardService {
             //스토리지 삭제
             payStorageRepository.delete(storage);
         }
+        board.setTrader(chatRoom.getBuyer());
         board.setBoardState(SOLD);
     }
 
-    public AccountResponseDto getAccount(Long boardId, Long chatId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
-        Account account = accountRepository.findByChatRoom(chatRoom)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
-        AccountResponseDto accountResponseDto = new AccountResponseDto();
-        accountResponseDto.setAccountNumber(account.getAccountNumber());
-        accountResponseDto.setBank(account.getBank());
-        accountResponseDto.setHolder(account.getHolder());
-        return accountResponseDto;
-    }
+//    public AccountResponseDto getAccount(Long boardId, Long chatId) {
+//        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+//        Account account = accountRepository.findByChatRoom(chatRoom)
+//                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
+//        AccountResponseDto accountResponseDto = new AccountResponseDto();
+//        accountResponseDto.setAccountNumber(account.getAccountNumber());
+//        accountResponseDto.setBank(account.getBank());
+//        accountResponseDto.setHolder(account.getHolder());
+//        return accountResponseDto;
+//    }
 
     //로그인한사람 (나) seller 인지 buyer인지 알려줌
     public WhoResponseDto buyWho(Long boardId, Long chatId, Member member) {
@@ -395,8 +383,24 @@ public class BoardService {
         return whoResponseDto;
     }
 
+    //작성한 내역(판매글, 구매글) - userId = memberId
+    public List<Board> writeList(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
+        List<Board> boards = boardRepository.findByMemberOrderByCreateDateDesc(member);
+        return boards;
+    }
+
+    //거래한 내역 - userId = traderId
+    public List<Board> tradeList(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
+        List<Board> boards = boardRepository.findByTraderOrderByCreateDateDesc(member);
+        return boards;
+    }
+
     @Data
-    public class AccountResponseDto{
+    public class AccountResponseDto {
         private String holder; // 예금주
         private String bank; // 은행
         private Long accountNumber; //계좌번호
@@ -407,5 +411,4 @@ public class BoardService {
         private String role;
     }
 
-    //글 삭제되면 account 정보 없어지게
 }

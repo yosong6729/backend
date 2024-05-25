@@ -6,6 +6,7 @@ import backend.time.dto.ResponseDto;
 import backend.time.model.Member.Member;
 import backend.time.service.MemberServiceImpl;
 import backend.time.service.NotificationService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,9 +33,11 @@ public class NotificationController {
 
     //프론트 쪽에서 사용자가 '로그인'을 하면, 해당 사용자를 sseEmitters 에 등록
     @GetMapping(value = "/api/notification/subscribe", produces = "text/event-stream")
-    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails) {
+    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+        log.info("subscribe");
         String kakaoId = userDetails.getUsername();
-        SseEmitter sseEmitter = notificationService.subscribe(kakaoId);
+        SseEmitter sseEmitter = notificationService.subscribe(kakaoId, response);
+        log.info("returnEmitter = {}" , sseEmitter);
         return sseEmitter;
     }
 
