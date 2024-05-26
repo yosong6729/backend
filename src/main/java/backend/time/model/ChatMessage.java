@@ -41,7 +41,7 @@ public class ChatMessage {
 
     private Long messageId;
 
-    @OneToMany(mappedBy = "chatMessage")
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatImage> chatImages = new ArrayList<>();
 
     public void addChat(ChatRoom chatRoom) {

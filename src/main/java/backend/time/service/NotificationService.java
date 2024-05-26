@@ -587,7 +587,9 @@ public class NotificationService {
             KeywordNotificationListDto KNLD = new KeywordNotificationListDto();
             KNLD.setKeywordId(m.getId());
             KNLD.setBoardId(m.getBoard().getId());
-            KNLD.setImage(m.getBoard().getImages().get(0).getStoredFileName());
+            if (!m.getBoard().getImages().isEmpty()){
+                KNLD.setImage(m.getBoard().getImages().get(0).getStoredFileName());
+            }
             KNLD.setTitle(m.getTitle());
             KNLD.setKeyword(m.getKeyword());
             KNLD.setTime(MyPageController.Time.calculateTime(m.getCreateDate()));

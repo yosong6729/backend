@@ -1,5 +1,6 @@
 package backend.time.model.board;
 
+import backend.time.model.ChatRoom;
 import backend.time.model.KeywordNotification;
 import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
@@ -66,6 +67,9 @@ public class Board {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KeywordNotification> keywordNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRooms = new ArrayList<>();
 
     @Column(name = "created_date")
     @CreationTimestamp
