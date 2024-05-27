@@ -53,18 +53,6 @@ public class BoardService {
     final private PayStorageRepository payStorageRepository;
     final private AccountRepository accountRepository;
 
-//    @Transactional
-//    public void point(PointDto pointDto, Member member) {
-//        Member findMember = memberRepository.findById(member.getId())
-//                .orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
-////        Point point = createPoint(pointDto.getLongitude(), pointDto.getLatitude());
-////        findMember.setLocation(point);
-//        findMember.setLongitude(pointDto.getLongitude());
-//        findMember.setLatitude(pointDto.getLatitude());
-//        findMember.setAddress(pointDto.getAddress());
-//        entityManager.flush();
-//    }
-
     @Transactional
     public void point(PointDto pointDto) {
         Member findMember = memberRepository.findByKakaoId(pointDto.getKakaoId())
@@ -118,11 +106,6 @@ public class BoardService {
         }
 
         return boardId;
-
-        // Point 객체 생성
-
-//        Point point = createPoint(longitude, latitude);
-//        board.setLocation(point); // 위치 설정
     }
 
     //글 검색 조건 or 페이징
@@ -141,13 +124,6 @@ public class BoardService {
                 .map(BoardDistanceDto::getDistance)
                 .collect(Collectors.toList());
         System.out.println("distance : "+ distance);
-
-//        Specification<Board> spec = Specification.where(null);
-
-//        if (boardIds != null && !boardIds.isEmpty()) {
-//            List<Long> finalBoardIds = boardIds;
-//            spec = spec.and((root, query, cb) -> root.get("id").in(finalBoardIds));
-//        }
 
         Specification<Board> spec = Specification.where(BoardSpecification.withIds(boardIds))
                 .and(BoardSpecification.withTitleOrContent(requestDto.getKeyword()))
@@ -181,7 +157,7 @@ public class BoardService {
         board.setBoardType(BoardType.valueOf(boardUpdateDto.getBoardType()));
         List<MultipartFile> images = boardUpdateDto.getImages();
         //사진 받고 있던 거면 냅두고 없으면 추가 없어진 건 삭제
-        if (!images.isEmpty()) {
+        if (images != null && !images.isEmpty()) {
             List<Image> findImages = imageRepository.findByBoard(board);
             Set<String> imageNames = images.stream()
                     .map(MultipartFile::getOriginalFilename)
@@ -303,24 +279,6 @@ public class BoardService {
         board.setBoardState(SALE);
     }
 
-//    @Transactional
-//    public void saveAccount(AccountDto accountdto, Long boardId, Long chatId, Long userId) {
-//        Board board = boardRepository.findById(boardId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다."));
-//        Member member = memberRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 존재하지 않습니다."));
-//        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
-//        Account account = Account.builder()
-//                .accountNumber(accountdto.getAccountNumber())
-//                .bank(accountdto.getBank())
-//                .member(member)
-//                .board(board)
-//                .chatRoom(chatRoom)
-//                .holder(accountdto.getHolder()).build();
-//        accountRepository.save(account);
-//    }
-
     @Transactional
     public void complete(Long boardId, Long chatId) {
         Board board = boardRepository.findById(boardId)
@@ -346,17 +304,17 @@ public class BoardService {
         board.setBoardState(SOLD);
     }
 
-//    public AccountResponseDto getAccount(Long boardId, Long chatId) {
-//        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
-//        Account account = accountRepository.findByChatRoom(chatRoom)
-//                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
-//        AccountResponseDto accountResponseDto = new AccountResponseDto();
-//        accountResponseDto.setAccountNumber(account.getAccountNumber());
-//        accountResponseDto.setBank(account.getBank());
-//        accountResponseDto.setHolder(account.getHolder());
-//        return accountResponseDto;
-//    }
+    public AccountResponseDto getAccount(Long boardId, Long chatId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+        Account account = accountRepository.findByChatRoom(chatRoom)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 계좌 정보가 존재하지 않습니다."));
+        AccountResponseDto accountResponseDto = new AccountResponseDto();
+        accountResponseDto.setAccountNumber(account.getAccountNumber());
+        accountResponseDto.setBank(account.getBank());
+        accountResponseDto.setHolder(account.getHolder());
+        return accountResponseDto;
+    }
 
     //로그인한사람 (나) seller 인지 buyer인지 알려줌
     public WhoResponseDto buyWho(Long boardId, Long chatId, Member member) {

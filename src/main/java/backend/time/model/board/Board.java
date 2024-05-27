@@ -1,5 +1,6 @@
 package backend.time.model.board;
 
+import backend.time.model.ChatRoom;
 import backend.time.model.KeywordNotification;
 import backend.time.model.Member.Member;
 import backend.time.model.Scrap;
@@ -73,6 +74,10 @@ public class Board {
 
     @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private Account account; // 글에 대한 계좌 정보
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRooms; // 글 삭제 시 chatroom들 삭제
+
 
     //지도 관련
     private String address;

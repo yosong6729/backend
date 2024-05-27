@@ -98,7 +98,7 @@ public class NotificationService {
 //                                List<Image> ImageList = imageRepository.findByBoard(board);
                                 eventData.put("keyword", keyword.getKeyword());
                                 eventData.put("boardId", boardId);
-                                if (board.getImages().size() != 0) {
+                                if (board.getImages() != null && !board.getImages().isEmpty()) {
                                     eventData.put("image", board.getImages().get(0).getStoredFileName());
                                     log.info("image = {}", board.getImages().get(0).getStoredFileName());
                                 }
@@ -131,7 +131,7 @@ public class NotificationService {
                                     log.info("keyword.getKeyword() = {}", keyword.getKeyword());
                                     eventData.put("boardId", boardId);
                                     log.info("boardId = {}", boardId);
-                                    if (board.getImages().size() != 0) {
+                                    if (board.getImages() != null && !board.getImages().isEmpty()) {
                                         eventData.put("image", board.getImages().get(0).getStoredFileName());
                                         log.info("image = {}", board.getImages().get(0).getStoredFileName());
                                     }
@@ -587,7 +587,9 @@ public class NotificationService {
             KeywordNotificationListDto KNLD = new KeywordNotificationListDto();
             KNLD.setKeywordId(m.getId());
             KNLD.setBoardId(m.getBoard().getId());
-            KNLD.setImage(m.getBoard().getImages().get(0).getStoredFileName());
+            if(!m.getBoard().getImages().isEmpty()) {
+                KNLD.setImage(m.getBoard().getImages().get(0).getStoredFileName());
+            }
             KNLD.setTitle(m.getTitle());
             KNLD.setKeyword(m.getKeyword());
             KNLD.setTime(MyPageController.Time.calculateTime(m.getCreateDate()));

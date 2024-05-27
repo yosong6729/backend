@@ -210,18 +210,18 @@ public class BoardApiController {
         return new ResponseDto<String>(HttpStatus.OK.value(),"판매완료로 변경 됨");
     }
 
-//    //계좌 저장
-//    @PostMapping("/api/board/{boardId}/chat/{chatId}/account")
-//    public ResponseDto saveAccount(@RequestBody AccountDto accountdto, @PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId, @AuthenticationPrincipal PrincipalDetail principalDetail) {
-//        boardService.saveAccount(accountdto, boardId, chatId, principalDetail.getMember().getId());
-//            return new ResponseDto(HttpStatus.OK.value(), "계좌 저장 완료");
-//    }
-
     //로그인한사람이 seller/buyer 인지 식별
     @GetMapping("/api/board/{boardId}/chat/{chatId}/who")
     public Result who(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId, @AuthenticationPrincipal PrincipalDetail principalDetail) throws IOException {
         BoardService.WhoResponseDto whoResponseDto = boardService.buyWho(boardId, chatId, principalDetail.getMember());
         return new Result<>(whoResponseDto);
+    }
+
+    //계좌 내보내기
+    @GetMapping("/api/board/{boardId}/chat/{chatId}/account")
+    public Result getAccount(@PathVariable("boardId") Long boardId, @PathVariable("chatId") Long chatId) {
+        BoardService.AccountResponseDto dto = boardService.getAccount(boardId, chatId);
+        return new Result<>(dto);
     }
 
     //<------------------거래한 글, 구매한 글-------------------->
