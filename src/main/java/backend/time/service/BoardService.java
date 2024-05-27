@@ -53,6 +53,9 @@ public class BoardService {
     final private PayStorageRepository payStorageRepository;
     final private AccountRepository accountRepository;
 
+    // 금지 단어 목록
+    List<String> forbiddenWords = List.of("과제", "소주", "맥주", "담배", "성매매", "마약", "주류", "씨발", "시발", "지랄", "존나", "개새끼");
+
     @Transactional
     public void point(PointDto pointDto) {
         Member findMember = memberRepository.findByKakaoId(pointDto.getKakaoId())
@@ -69,10 +72,6 @@ public class BoardService {
 
     @Transactional
     public Long write(BoardDto boardDto, Member member) throws IOException {
-
-        // 금지 단어 목록
-        List<String> forbiddenWords = List.of("과제", "소주", "맥주", "담배", "성매매", "마약");
-
         // 제목과 내용에 금지 단어가 포함되어 있는지 검사
         for (String word : forbiddenWords) {
             if (boardDto.getTitle().contains(word) || boardDto.getContent().contains(word)) {
@@ -152,9 +151,6 @@ public class BoardService {
 
     @Transactional
     public void update(Long id, BoardUpdateDto boardUpdateDto) throws IOException {
-
-        // 금지 단어 목록
-        List<String> forbiddenWords = List.of("과제", "소주", "맥주", "담배", "성매매", "마약");
 
         // 제목과 내용에 금지 단어가 포함되어 있는지 검사
         for (String word : forbiddenWords) {
