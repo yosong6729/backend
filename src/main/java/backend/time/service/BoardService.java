@@ -307,6 +307,12 @@ public class BoardService {
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 글이 존재하지 않습니다."));
         ChatRoom chatRoom = chatRoomRepository.findById(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 존재하지 않습니다."));
+
+        //거래중인 글 아니면 예외처리
+        if(board.getBoardState()==SALE || board.getBoardState()==SOLD){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
         //틈새페이는 상대방에게 이동
         if(board.getPayMethod().equals(PAY)) {
             PayStorage storage = payStorageRepository.findByBoard(board)
