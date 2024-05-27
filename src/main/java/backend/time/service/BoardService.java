@@ -69,6 +69,17 @@ public class BoardService {
 
     @Transactional
     public Long write(BoardDto boardDto, Member member) throws IOException {
+
+        // 금지 단어 목록
+        List<String> forbiddenWords = List.of("과제", "소주", "맥주", "담배", "성매매", "마약");
+
+        // 제목과 내용에 금지 단어가 포함되어 있는지 검사
+        for (String word : forbiddenWords) {
+            if (boardDto.getTitle().contains(word) || boardDto.getContent().contains(word)) {
+                throw new IllegalArgumentException("제목이나 내용에 금지된 단어가 포함되어 있습니다: " + word);
+            }
+        }
+
         Board board = new Board();
         board.setCategory(BoardCategory.valueOf(boardDto.getCategory()));
         board.setTitle(boardDto.getTitle());
@@ -141,6 +152,17 @@ public class BoardService {
 
     @Transactional
     public void update(Long id, BoardUpdateDto boardUpdateDto) throws IOException {
+
+        // 금지 단어 목록
+        List<String> forbiddenWords = List.of("과제", "소주", "맥주", "담배", "성매매", "마약");
+
+        // 제목과 내용에 금지 단어가 포함되어 있는지 검사
+        for (String word : forbiddenWords) {
+            if (boardUpdateDto.getTitle().contains(word) || boardUpdateDto.getContent().contains(word)) {
+                throw new IllegalArgumentException("제목이나 내용에 금지된 단어가 포함되어 있습니다: " + word);
+            }
+        }
+
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
         if(board.getBoardState()==RESERVED || board.getBoardState()==SOLD){
