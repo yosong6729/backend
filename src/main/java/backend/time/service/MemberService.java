@@ -527,21 +527,42 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         List<ServiceEvaluation> serviceEvaluationList = serviceEvaluationRepository.findByMemberAndBoardCategory(member, category);
-        List<ServiceEvaluationDto> serviceEvaluationDtoList = new ArrayList<>();
+        List<ServiceEvaluationDto> servicePositiveDtoList = new ArrayList<>();
+        List<ServiceEvaluationDto> serviceNegativeDtoList = new ArrayList<>();
 
         for(int i=0; i<serviceEvaluationList.size(); i++) {
             ServiceEvaluation serviceEvaluation = serviceEvaluationList.get(i);
-            ServiceEvaluationDto serviceEvaluationDto = ServiceEvaluationDto.builder()
-                    .serviceEvaluationCategory(serviceEvaluation.getServiceEvaluationCategory())
-                    .boardCategory(serviceEvaluation.getBoardCategory())//지워도 되는지 확인
-                    .serviceEvaluationCount(serviceEvaluation.getServiceEvaluationCount())
-                    .build();
-            serviceEvaluationDtoList.add(serviceEvaluationDto);
+            if(getMood(serviceEvaluation.getServiceEvaluationCategory())==1){
+                ServiceEvaluationDto serviceEvaluationDto = ServiceEvaluationDto.builder()
+                        .serviceEvaluationCategory(serviceEvaluation.getServiceEvaluationCategory())
+                        .boardCategory(serviceEvaluation.getBoardCategory())//지워도 되는지 확인
+                        .serviceEvaluationCount(serviceEvaluation.getServiceEvaluationCount())
+                        .build();
+                servicePositiveDtoList.add(serviceEvaluationDto);
+            }
+            else{
+                ServiceEvaluationDto serviceEvaluationDto = ServiceEvaluationDto.builder()
+                        .serviceEvaluationCategory(serviceEvaluation.getServiceEvaluationCategory())
+                        .boardCategory(serviceEvaluation.getBoardCategory())//지워도 되는지 확인
+                        .serviceEvaluationCount(serviceEvaluation.getServiceEvaluationCount())
+                        .build();
+                serviceNegativeDtoList.add(serviceEvaluationDto);
+            }
+
         }
 
         return  ServiceEvaluationResponseDto.builder()
-                .serviceEvaluationList(serviceEvaluationDtoList)
+                .servicePositiveList(servicePositiveDtoList)
+                .serviceNegativeList(serviceNegativeDtoList)
                 .build();
+    }
+    public int getMood(ServiceEvaluationCategory serviceEvaluationCategory){
+        if(serviceEvaluationCategory.equals(ServiceEvaluationCategory.EXACT)||serviceEvaluationCategory.equals(ServiceEvaluationCategory.FLEXIBILITY)||serviceEvaluationCategory.equals(ServiceEvaluationCategory.POSITIVE)){
+            return 1;
+        }
+        else{
+            return 0;
+        }
     }
 
     public MemberResponseDto getProfile(Long id){

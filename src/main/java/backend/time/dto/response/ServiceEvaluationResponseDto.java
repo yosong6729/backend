@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ServiceEvaluationResponseDto {
-        private List<ServiceEvaluationDto> serviceEvaluationList;
+        private List<ServiceEvaluationDto> servicePositiveList;
+        private List<ServiceEvaluationDto> serviceNegativeList;
 
 }
