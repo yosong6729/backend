@@ -18,6 +18,8 @@ bin/
 !**/src/test/**/bin/
 application-mysql.properties
 
+
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -36,3 +38,4 @@ out/
 
 ### VS Code ###
 .vscode/
+
